@@ -1,0 +1,21 @@
+services:
+  clm-app:
+    build: .
+    ports:
+      - "8501:8501"  # Map container port 8501 to host port 8501
+    volumes:
+      - type: bind
+        source: ./.tokens
+        target: /app/.tokens
+      - type: bind
+        source: ./logs
+        target: /app/logs
+      - type: bind
+        source: ./src/image
+        target: /app/image
+    environment:
+      - DOCUSIGN_CLIENT_ID=${DOCUSIGN_CLIENT_ID}
+      - DOCUSIGN_CLIENT_SECRET=${DOCUSIGN_CLIENT_SECRET}
+      - DOCUSIGN_REDIRECT_URI=${DOCUSIGN_REDIRECT_URI}
+      - DOCUSIGN_AUTH_SERVER=${DOCUSIGN_AUTH_SERVER}
+    restart: unless-stopped
