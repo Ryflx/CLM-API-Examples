@@ -203,10 +203,25 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
             st.json(response_data)
             
         # Display the DocLauncher Result URL
-            # Display DocLauncher Result URL
+            # Display DocLauncher Result URL with authentication
             if "DocLauncherResultUrl" in response_data:
+                result_url = response_data['DocLauncherResultUrl']
                 st.info("DocLauncher Result URL:")
-                st.markdown(f"[Click here to open]({response_data['DocLauncherResultUrl']})")
+                
+                # Get the actual content URL with server-side request
+                try:
+                    headers = {
+                        'Authorization': f"Bearer {st.session_state.token_data['access_token']}",
+                        'Accept': 'text/html'
+                    }
+                    response = requests.get(result_url, headers=headers, allow_redirects=True)
+                    if response.status_code == 200:
+                        st.info("DocLauncher is ready. Click below to open:")
+                        st.markdown(f"[Open DocLauncher]({response.url})")
+                    else:
+                        st.error(f"Failed to get DocLauncher URL: {response.status_code}")
+                except Exception as e:
+                    st.error(f"Error accessing DocLauncher: {str(e)}")
             
             # Display Status
             if "Status" in response_data:
