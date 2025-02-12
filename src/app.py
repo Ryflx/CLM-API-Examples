@@ -147,9 +147,7 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
             "DataType": "XML",
             "DocLauncherConfiguration": {
                 "Href": config_href
-            },
-            "Name": "Document Generation Request",
-            "Description": "Generated via CLM API Example"
+            }
         }
 
         # Prepare headers
@@ -319,34 +317,10 @@ def main():
                         st.session_state.selected_config = config_options[selected_config_name]
                         
                         # XML Payload input
-                        # Show example payload structure
-                        with st.expander("View Example XML Structure"):
-                            st.code("""
-<DocLauncherData>
-    <Params>
-        <Source>CLM API Example</Source>
-        <DocumentName>Example Document</DocumentName>
-        <TemplateFields>
-            <Field1>Value1</Field1>
-            <Field2>Value2</Field2>
-        </TemplateFields>
-    </Params>
-</DocLauncherData>
-""", language="xml")
-                            
                         xml_payload = st.text_area(
                             "Enter XML Payload",
-                            value="""<DocLauncherData>
-    <Params>
-        <Source>CLM API Example</Source>
-        <DocumentName>Example Document</DocumentName>
-        <TemplateFields>
-            <Field1>Value1</Field1>
-            <Field2>Value2</Field2>
-        </TemplateFields>
-    </Params>
-</DocLauncherData>""",
-                            height=300
+                            value='<Params><Source>CLM API Example</Source></Params>',
+                            height=150
                         )
                         
                         # Create task button
