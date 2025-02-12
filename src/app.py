@@ -171,7 +171,7 @@ def get_docgen_configurations(account_id, max_retries=3):
         st.error(error_msg)
         return None
 
-def create_doc_launcher_task(account_id, config_href, xml_payload):
+def create_doc_launcher_task(account_id, config_href, xml_payload, max_retries=3):
     """Create a DocLauncher task using CLM API"""
     try:
         # Prepare the request data
@@ -192,26 +192,49 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
         # Make the API call
         endpoint = f"https://apiuatna11.springcm.com/v2/{account_id}/doclaunchertasks"
         
-        log_api_call("POST", endpoint, request_data=data)
-
-        response = requests.post(
-            endpoint,
-            headers=headers,
-            json=data
-        )
-        
-        try:
-            response_data = response.json()
-            if response.status_code not in [200, 202]:
-                error_details = response_data.get('Message', response.text)
-                logger.error(f"API Error: {response.status_code} - {error_details}")
-                st.error(f"API Error ({response.status_code}): {error_details}")
-                return None
-        except ValueError:
-            error_msg = f"API Error ({response.status_code}): {response.text}"
-            logger.error(error_msg)
-            st.error(error_msg)
-            return None
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                log_api_call("POST", endpoint, request_data=data)
+                response = requests.post(
+                    endpoint,
+                    headers=headers,
+                    json=data
+                )
+                
+                # Check if we got a 500 error
+                if response.status_code == 500:
+                    retry_count += 1
+                    if retry_count < max_retries:
+                        st.warning(f"Server error, retrying... (Attempt {retry_count + 1}/{max_retries})")
+                        continue
+                    else:
+                        st.error("Maximum retries reached. Please try again later.")
+                        return None
+                
+                try:
+                    response_data = response.json()
+                    if response.status_code not in [200, 202]:
+                        error_details = response_data.get('Message', response.text)
+                        logger.error(f"API Error: {response.status_code} - {error_details}")
+                        st.error(f"API Error ({response.status_code}): {error_details}")
+                        return None
+                except ValueError:
+                    error_msg = f"API Error ({response.status_code}): {response.text}"
+                    logger.error(error_msg)
+                    st.error(error_msg)
+                    return None
+                
+                break  # Success, exit retry loop
+                
+            except requests.exceptions.RequestException as e:
+                retry_count += 1
+                if retry_count < max_retries:
+                    st.warning(f"Connection error, retrying... (Attempt {retry_count + 1}/{max_retries})")
+                    continue
+                else:
+                    st.error(f"Failed to connect after {max_retries} attempts: {str(e)}")
+                    return None
             
         response.raise_for_status()
         log_api_call("POST", endpoint, response_data=response_data)
