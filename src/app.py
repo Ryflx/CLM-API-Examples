@@ -205,7 +205,7 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
             # Display DocLauncher Result URL with authentication
             if "DocLauncherResultUrl" in response_data:
                 result_url = response_data['DocLauncherResultUrl']
-                st.info("DocLauncher Result URL:")
+                
                 
                 # Get the actual content URL with server-side request
                 try:
