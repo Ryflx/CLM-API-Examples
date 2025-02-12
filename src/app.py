@@ -205,8 +205,8 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
                 }
                 response = requests.get(result_url, headers=headers, allow_redirects=True)
                 if response.status_code == 200:
-                    st.info("DocLauncher is ready. Click below to open")
-                    st.markdown(f"[Open DocLauncher]({response.url})")
+                    st.info("Opening DocLauncher in a new tab...")
+                    webbrowser.open_new_tab(response.url)
                 else:
                     st.error(f"Failed to get DocLauncher URL: {response.status_code}")
             except Exception as e:
@@ -270,10 +270,10 @@ def main():
         if st.button("Connect to DocuSign"):
             redirect_uri = get_actual_redirect_uri()
             consent_url = auth_handler.get_consent_url(redirect_uri)
-            logger.info("Generated DocuSign consent URL")
-            st.info("Please copy and open this URL in your browser to authenticate:")
-            st.code(consent_url)
-            st.info("After authentication, DocuSign will redirect you back to this application.")
+            logger.info(f"Opening DocuSign consent URL: {consent_url}")
+            webbrowser.open_new_tab(consent_url)
+            st.info("Opening DocuSign authentication in a new tab...")
+            st.info("After authentication, you will be redirected back to this application.")
     else:
         if check_token():
             st.success("Connected to DocuSign")
