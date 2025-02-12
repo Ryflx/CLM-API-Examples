@@ -205,7 +205,7 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
                 }
                 response = requests.get(result_url, headers=headers, allow_redirects=True)
                 if response.status_code == 200:
-                    st.info("DocLauncher is ready. Click below to open:")
+                    st.info("DocLauncher is ready. Click below to open")
                     st.markdown(f"[Open DocLauncher]({response.url})")
                 else:
                     st.error(f"Failed to get DocLauncher URL: {response.status_code}")
