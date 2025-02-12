@@ -94,7 +94,7 @@ def check_token():
         return True
     return False
 
-def get_docgen_configurations(account_id):
+def get_docgen_configurations(account_id, max_retries=3):
     """Get list of docgen configurations with pagination support"""
     try:
         headers = {
@@ -106,20 +106,53 @@ def get_docgen_configurations(account_id):
         next_url = f"https://apiuatna11.springcm.com/v2/{account_id}/doclauncherconfigurations?limit=100"
 
         while next_url:
-            log_api_call("GET", next_url)
-            response = requests.get(next_url, headers=headers)
-            response.raise_for_status()
-            
-            response_data = response.json()
-            log_api_call("GET", next_url, response_data=response_data)
-            
-            if 'Items' in response_data:
-                all_items.extend(response_data['Items'])
-            
-            # Check if there are more pages
-            next_url = response_data.get('Next')
-            if next_url:
-                st.write(f"Fetching more configurations... ({len(all_items)} so far)")
+            retry_count = 0
+            while retry_count < max_retries:
+                try:
+                    log_api_call("GET", next_url)
+                    response = requests.get(next_url, headers=headers)
+                    
+                    # Check if we got a 500 error
+                    if response.status_code == 500:
+                        retry_count += 1
+                        if retry_count < max_retries:
+                            st.warning(f"Server error, retrying... (Attempt {retry_count + 1}/{max_retries})")
+                            continue
+                        else:
+                            st.error("Maximum retries reached. Please try again later.")
+                            return None
+                    
+                    # For other errors, try to get more details
+                    if response.status_code != 200:
+                        try:
+                            error_data = response.json()
+                            error_msg = error_data.get('Message', response.text)
+                        except:
+                            error_msg = response.text
+                        st.error(f"API Error ({response.status_code}): {error_msg}")
+                        return None
+                    
+                    response_data = response.json()
+                    log_api_call("GET", next_url, response_data=response_data)
+                    
+                    if 'Items' in response_data:
+                        all_items.extend(response_data['Items'])
+                    
+                    # Check if there are more pages
+                    next_url = response_data.get('Next')
+                    if next_url:
+                        st.write(f"Fetching more configurations... ({len(all_items)} so far)")
+                    
+                    break  # Success, exit retry loop
+                    
+                except requests.exceptions.RequestException as e:
+                    retry_count += 1
+                    if retry_count < max_retries:
+                        st.warning(f"Connection error, retrying... (Attempt {retry_count + 1}/{max_retries})")
+                        continue
+                    else:
+                        st.error(f"Failed to connect after {max_retries} attempts: {str(e)}")
+                        return None
 
         # Create final response with all items
         final_response = {
