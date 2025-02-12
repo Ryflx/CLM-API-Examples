@@ -176,8 +176,7 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
         
         # Debug logging
         st.write("API Response Status:", response.status_code)
-        st.write("API Response Headers:", dict(response.headers))
-        st.write("API Response Text:", response.text)
+        
         
         try:
             response_data = response.json()
