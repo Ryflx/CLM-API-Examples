@@ -207,6 +207,8 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
                 if response.status_code == 200:
                     st.info("Opening DocLauncher in a new tab...")
                     webbrowser.open_new_tab(response.url)
+                    st.info("If the tab doesn't open automatically, click the link below:")
+                    st.markdown(f"[Open DocLauncher]({response.url})")
                 else:
                     st.error(f"Failed to get DocLauncher URL: {response.status_code}")
             except Exception as e:
@@ -273,6 +275,8 @@ def main():
             logger.info(f"Opening DocuSign consent URL: {consent_url}")
             webbrowser.open_new_tab(consent_url)
             st.info("Opening DocuSign authentication in a new tab...")
+            st.info("If the tab doesn't open automatically, click the link below:")
+            st.markdown(f"[Open DocuSign Authentication]({consent_url})")
             st.info("After authentication, you will be redirected back to this application.")
     else:
         if check_token():
