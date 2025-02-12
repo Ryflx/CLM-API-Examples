@@ -174,12 +174,17 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
             json=data
         )
         
-        response_data = response.json()
-        
-        if response.status_code != 200:
-            error_details = response_data.get('Message', 'No error details provided')
-            logger.error(f"API Error: {response.status_code} - {error_details}")
-            st.error(f"API Error: {error_details}")
+        try:
+            response_data = response.json()
+            if response.status_code != 200:
+                error_details = response_data.get('Message', response.text)
+                logger.error(f"API Error: {response.status_code} - {error_details}")
+                st.error(f"API Error ({response.status_code}): {error_details}")
+                return None
+        except ValueError:
+            error_msg = f"API Error ({response.status_code}): {response.text}"
+            logger.error(error_msg)
+            st.error(error_msg)
             return None
             
         response.raise_for_status()
