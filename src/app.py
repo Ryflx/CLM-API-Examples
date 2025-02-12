@@ -159,13 +159,6 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
         # Make the API call
         endpoint = f"https://apiuatna11.springcm.com/v2/{account_id}/doclaunchertasks"
         
-        # Debug logging
-        st.write("API Request:")
-        st.json({
-            "endpoint": endpoint,
-            "data": data
-        })
-        
         log_api_call("POST", endpoint, request_data=data)
 
         response = requests.post(
@@ -174,13 +167,8 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
             json=data
         )
         
-        # Debug logging
-        st.write("API Response Status:", response.status_code)
-        
-        
         try:
             response_data = response.json()
-            st.write("API Response JSON:", response_data)
             if response.status_code not in [200, 202]:
                 error_details = response_data.get('Message', response.text)
                 logger.error(f"API Error: {response.status_code} - {error_details}")
