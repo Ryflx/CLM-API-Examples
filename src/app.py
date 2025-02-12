@@ -222,13 +222,13 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
                 except Exception as e:
                     st.error(f"Error accessing DocLauncher: {str(e)}")
             
-            # Display Status
+        # Display Status
             if "Status" in response_data:
                 status = response_data['Status']
                 if status == "Success":
                     st.success(f"Status: {status}")
                 else:
-                    st.warning(f"Status: {status}")
+                    st.warning(f"Status: {status}")    
 
         return response_data
 
