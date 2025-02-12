@@ -182,7 +182,7 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
         try:
             response_data = response.json()
             st.write("API Response JSON:", response_data)
-            if response.status_code != 200:
+            if response.status_code not in [200, 202]:
                 error_details = response_data.get('Message', response.text)
                 logger.error(f"API Error: {response.status_code} - {error_details}")
                 st.error(f"API Error ({response.status_code}): {error_details}")
@@ -203,12 +203,18 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
             st.json(response_data)
             
         # Display the DocLauncher Result URL
-        if "DocLauncherResultUrl" in response_data:
-            st.info(f"DocLauncher Result URL: {response_data['DocLauncherResultUrl']}")
+            # Display DocLauncher Result URL
+            if "DocLauncherResultUrl" in response_data:
+                st.info("DocLauncher Result URL:")
+                st.markdown(f"[Click here to open]({response_data['DocLauncherResultUrl']})")
             
-        # Display Status
-        if "Status" in response_data:
-            st.success(f"Status: {response_data['Status']}")
+            # Display Status
+            if "Status" in response_data:
+                status = response_data['Status']
+                if status == "Success":
+                    st.success(f"Status: {status}")
+                else:
+                    st.warning(f"Status: {status}")
 
         return response_data
 
