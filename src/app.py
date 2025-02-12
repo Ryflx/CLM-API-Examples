@@ -147,7 +147,9 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
             "DataType": "XML",
             "DocLauncherConfiguration": {
                 "Href": config_href
-            }
+            },
+            "Name": "Document Generation Request",
+            "Description": "Generated via CLM API Example"
         }
 
         # Prepare headers
@@ -173,9 +175,16 @@ def create_doc_launcher_task(account_id, config_href, xml_payload):
             headers=headers,
             json=data
         )
-        response.raise_for_status()
         
         response_data = response.json()
+        
+        if response.status_code != 200:
+            error_details = response_data.get('Message', 'No error details provided')
+            logger.error(f"API Error: {response.status_code} - {error_details}")
+            st.error(f"API Error: {error_details}")
+            return None
+            
+        response.raise_for_status()
         log_api_call("POST", endpoint, response_data=response_data)
         st.success("DocLauncher task created successfully!")
         logger.info(f"DocLauncher task created successfully: {response_data}")
@@ -310,10 +319,34 @@ def main():
                         st.session_state.selected_config = config_options[selected_config_name]
                         
                         # XML Payload input
+                        # Show example payload structure
+                        with st.expander("View Example XML Structure"):
+                            st.code("""
+<DocLauncherData>
+    <Params>
+        <Source>CLM API Example</Source>
+        <DocumentName>Example Document</DocumentName>
+        <TemplateFields>
+            <Field1>Value1</Field1>
+            <Field2>Value2</Field2>
+        </TemplateFields>
+    </Params>
+</DocLauncherData>
+""", language="xml")
+                            
                         xml_payload = st.text_area(
                             "Enter XML Payload",
-                            value='<Params><Source>CLM API Example</Source></Params>',
-                            height=150
+                            value="""<DocLauncherData>
+    <Params>
+        <Source>CLM API Example</Source>
+        <DocumentName>Example Document</DocumentName>
+        <TemplateFields>
+            <Field1>Value1</Field1>
+            <Field2>Value2</Field2>
+        </TemplateFields>
+    </Params>
+</DocLauncherData>""",
+                            height=300
                         )
                         
                         # Create task button
