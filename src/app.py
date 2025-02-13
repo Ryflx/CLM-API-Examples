@@ -291,6 +291,160 @@ def get_actual_redirect_uri():
         return get_config('DOCUSIGN_REDIRECT_URI')
     return base_url
 
+def show_catalog():
+    """Display the catalog of available features"""
+    st.title("Available Features")
+    
+    # Create a grid layout for feature cards
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+            <div style='border:1px solid #ddd; padding:20px; border-radius:5px; text-align:center; height:300px;'>
+                <img src='https://via.placeholder.com/150' style='max-width:150px;'/>
+                <h3>Launch DocGen Form</h3>
+                <p style='min-height:60px;'>Create documents using DocGen configurations</p>
+                <button style='background-color:#00b4e6; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;' 
+                        onclick='document.querySelector("#launch-docgen").click()'>Get Started</button>
+            </div>
+        """, unsafe_allow_html=True)
+        if st.button("Get Started", key="launch-docgen", type="primary"):
+            st.session_state.current_view = 'docgen'
+            st.rerun()
+            
+    with col2:
+        st.markdown("""
+            <div style='border:1px solid #ddd; padding:20px; border-radius:5px; text-align:center; height:300px; opacity:0.7;'>
+                <img src='https://via.placeholder.com/150' style='max-width:150px;'/>
+                <h3>Contract Review</h3>
+                <p style='min-height:60px;'>Review and track contract status<br/><i>Coming Soon</i></p>
+                <button style='background-color:#ddd; color:#666; padding:10px 20px; border:none; border-radius:5px; cursor:not-allowed;'>
+                    Coming Soon
+                </button>
+            </div>
+        """, unsafe_allow_html=True)
+            
+    with col3:
+        st.markdown("""
+            <div style='border:1px solid #ddd; padding:20px; border-radius:5px; text-align:center; height:300px; opacity:0.7;'>
+                <img src='https://via.placeholder.com/150' style='max-width:150px;'/>
+                <h3>Template Management</h3>
+                <p style='min-height:60px;'>Manage document templates<br/><i>Coming Soon</i></p>
+                <button style='background-color:#ddd; color:#666; padding:10px 20px; border:none; border-radius:5px; cursor:not-allowed;'>
+                    Coming Soon
+                </button>
+            </div>
+        """, unsafe_allow_html=True)
+            
+    # Second row
+    col4, col5, col6 = st.columns(3)
+    
+    with col4:
+        st.markdown("""
+            <div style='border:1px solid #ddd; padding:20px; border-radius:5px; text-align:center; height:300px; opacity:0.7;'>
+                <img src='https://via.placeholder.com/150' style='max-width:150px;'/>
+                <h3>Workflow Management</h3>
+                <p style='min-height:60px;'>Configure and manage workflows<br/><i>Coming Soon</i></p>
+                <button style='background-color:#ddd; color:#666; padding:10px 20px; border:none; border-radius:5px; cursor:not-allowed;'>
+                    Coming Soon
+                </button>
+            </div>
+        """, unsafe_allow_html=True)
+            
+    with col5:
+        st.markdown("""
+            <div style='border:1px solid #ddd; padding:20px; border-radius:5px; text-align:center; height:300px; opacity:0.7;'>
+                <img src='https://via.placeholder.com/150' style='max-width:150px;'/>
+                <h3>Document Search</h3>
+                <p style='min-height:60px;'>Search across your documents<br/><i>Coming Soon</i></p>
+                <button style='background-color:#ddd; color:#666; padding:10px 20px; border:none; border-radius:5px; cursor:not-allowed;'>
+                    Coming Soon
+                </button>
+            </div>
+        """, unsafe_allow_html=True)
+            
+    with col6:
+        st.markdown("""
+            <div style='border:1px solid #ddd; padding:20px; border-radius:5px; text-align:center; height:300px; opacity:0.7;'>
+                <img src='https://via.placeholder.com/150' style='max-width:150px;'/>
+                <h3>Analytics</h3>
+                <p style='min-height:60px;'>View usage and performance metrics<br/><i>Coming Soon</i></p>
+                <button style='background-color:#ddd; color:#666; padding:10px 20px; border:none; border-radius:5px; cursor:not-allowed;'>
+                    Coming Soon
+                </button>
+            </div>
+        """, unsafe_allow_html=True)
+
+def show_docgen_interface():
+    """Show the DocGen form interface"""
+    # Add back button
+    if st.button("← Back to Catalog"):
+        st.session_state.current_view = 'catalog'
+        st.rerun()
+        
+    st.title("Launch DocGen Form")
+    st.write("Enter details below to pull and kick off a Doc Gen Form")
+    
+    # Get configurations if not already loaded
+    if not st.session_state.configs:
+        with st.spinner("Loading DocGen configurations..."):
+            configs = get_docgen_configurations(st.session_state.account_id)
+            if configs:
+                st.session_state.configs = configs
+    
+    # Display configuration selection
+    if st.session_state.configs:
+        # Create initial list of configuration names and their hrefs
+        config_options = {}
+        for config in st.session_state.configs.get('Items', []):
+            name = config.get('Name', '')
+            config_id = config.get('Id', '')
+            href = config.get('Href')
+            display_name = f"{name} ({config_id})" if name and config_id else name or 'Unnamed'
+            config_options[display_name] = href
+        
+        # Configuration selection
+        selected_config_name = st.selectbox(
+            "Select DocGen Configuration",
+            options=list(config_options.keys()),
+            key="config_selector"
+        )
+
+        # Search functionality (optional)
+        show_search = st.checkbox("Enable Search")
+        if show_search:
+            search_term = st.text_input("Search Configurations", "").lower()
+            # Filter options based on search
+            if search_term:
+                filtered_options = {k: v for k, v in config_options.items() if search_term in k.lower()}
+                st.write(f"Found {len(filtered_options)} configurations matching search")
+                selected_config_name = st.selectbox(
+                    "Filtered Configurations",
+                    options=list(filtered_options.keys()),
+                    key="filtered_selector"
+                )
+        
+        if selected_config_name:
+            st.session_state.selected_config = config_options[selected_config_name]
+            
+            # XML Payload input
+            xml_payload = st.text_area(
+                "Enter XML Payload",
+                value='<Params><Source>CLM API Example</Source></Params>',
+                height=150
+            )
+            
+            # Create task button
+            if st.button("Create DocLauncher Task"):
+                if not xml_payload:
+                    st.error("Please enter an XML payload")
+                else:
+                    create_doc_launcher_task(
+                        st.session_state.account_id,
+                        st.session_state.selected_config,
+                        xml_payload
+                    )
+
 def main():
     # Add JavaScript for auto-hiding messages
     st.markdown("""
@@ -336,7 +490,6 @@ def main():
     
     st.image("https://cf-images.us-east-1.prod.boltdns.net/v1/static/6118377982001/f500d879-d469-4a49-851c-0337de041880/7c4ad13a-f83b-4e57-8cbc-7997519f8c96/1280x720/match/image.jpg?v=20250205.7")
     st.title("DocuSign CLM Integration")
-    st.write("Enter details below to pull and kick off a Doc Gen Form")
 
     # Initialize session state
     if 'authenticated' not in st.session_state:
@@ -345,10 +498,8 @@ def main():
         st.session_state.configs = None
     if 'selected_config' not in st.session_state:
         st.session_state.selected_config = None
-    
-    # Store the current URL as base_url if not present
-  
-    
+    if 'current_view' not in st.session_state:
+        st.session_state.current_view = 'catalog'
 
     # Check for callback
     if not st.session_state.authenticated:
@@ -408,7 +559,7 @@ def main():
                     "token_type": token_data['token_type']
                 })
 
-            # Check for account ID and load configurations
+            # Check for account ID
             if not hasattr(st.session_state, 'account_id'):
                 with st.form("account_id_form"):
                     st.info("Please enter your DocuSign Account ID to continue")
@@ -422,65 +573,11 @@ def main():
                         st.session_state.account_id = new_account_id
                         st.rerun()
             else:
-                # Get configurations if not already loaded
-                if not st.session_state.configs:
-                    with st.spinner("Loading DocGen configurations..."):
-                        configs = get_docgen_configurations(st.session_state.account_id)
-                        if configs:
-                            st.session_state.configs = configs
-                
-                # Display configuration selection
-                if st.session_state.configs:
-                    # Create initial list of configuration names and their hrefs
-                    config_options = {}
-                    for config in st.session_state.configs.get('Items', []):
-                        name = config.get('Name', '')
-                        config_id = config.get('Id', '')
-                        href = config.get('Href')
-                        display_name = f"{name} ({config_id})" if name and config_id else name or 'Unnamed'
-                        config_options[display_name] = href
-                    
-                    # Configuration selection
-                    selected_config_name = st.selectbox(
-                        "Select DocGen Configuration",
-                        options=list(config_options.keys()),
-                        key="config_selector"
-                    )
-
-                    # Search functionality (optional)
-                    show_search = st.checkbox("Enable Search")
-                    if show_search:
-                        search_term = st.text_input("Search Configurations", "").lower()
-                        # Filter options based on search
-                        if search_term:
-                            filtered_options = {k: v for k, v in config_options.items() if search_term in k.lower()}
-                            st.write(f"Found {len(filtered_options)} configurations matching search")
-                            selected_config_name = st.selectbox(
-                                "Filtered Configurations",
-                                options=list(filtered_options.keys()),
-                                key="filtered_selector"
-                            )
-                    
-                    if selected_config_name:
-                        st.session_state.selected_config = config_options[selected_config_name]
-                        
-                        # XML Payload input
-                        xml_payload = st.text_area(
-                            "Enter XML Payload",
-                            value='<Params><Source>CLM API Example</Source></Params>',
-                            height=150
-                        )
-                        
-                        # Create task button
-                        if st.button("Create DocLauncher Task"):
-                            if not xml_payload:
-                                st.error("Please enter an XML payload")
-                            else:
-                                create_doc_launcher_task(
-                                    st.session_state.account_id,
-                                    st.session_state.selected_config,
-                                    xml_payload
-                                )
+                # Show either catalog or specific interface
+                if st.session_state.current_view == 'catalog':
+                    show_catalog()
+                elif st.session_state.current_view == 'docgen':
+                    show_docgen_interface()
 
             if st.button("Disconnect"):
                 # Delete the token file
