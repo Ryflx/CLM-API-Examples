@@ -292,6 +292,47 @@ def get_actual_redirect_uri():
     return base_url
 
 def main():
+    # Add JavaScript for auto-hiding messages
+    st.markdown("""
+        <script>
+            function hideMessages() {
+                const messages = document.querySelectorAll('.stSuccess, .stInfo');
+                messages.forEach(msg => {
+                    setTimeout(() => {
+                        msg.style.transition = 'opacity 1s';
+                        msg.style.opacity = '0';
+                        setTimeout(() => msg.style.display = 'none', 1000);
+                    }, 5000);
+                });
+            }
+            
+            // Run on initial load
+            hideMessages();
+            
+            // Create observer to handle dynamically added messages
+            const observer = new MutationObserver(mutations => {
+                mutations.forEach(mutation => {
+                    mutation.addedNodes.forEach(node => {
+                        if (node.classList && 
+                            (node.classList.contains('stSuccess') || 
+                             node.classList.contains('stInfo'))) {
+                            setTimeout(() => {
+                                node.style.transition = 'opacity 1s';
+                                node.style.opacity = '0';
+                                setTimeout(() => node.style.display = 'none', 1000);
+                            }, 5000);
+                        }
+                    });
+                });
+            });
+            
+            // Start observing
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        </script>
+    """, unsafe_allow_html=True)
     
     st.image("https://cf-images.us-east-1.prod.boltdns.net/v1/static/6118377982001/f500d879-d469-4a49-851c-0337de041880/7c4ad13a-f83b-4e57-8cbc-7997519f8c96/1280x720/match/image.jpg?v=20250205.7")
     st.title("DocuSign CLM Integration")
