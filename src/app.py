@@ -291,90 +291,69 @@ def get_actual_redirect_uri():
         return get_config('DOCUSIGN_REDIRECT_URI')
     return base_url
 
+def show_feature_card(title, description, is_active=False):
+    """Helper function to create a consistent feature card"""
+    # Create a container with border styling
+    with st.container():
+        st.markdown("---")  # Visual separator
+        cols = st.columns([2, 3, 2])  # Image, Text, Button columns
+        
+        with cols[0]:  # Image column
+            st.image("https://via.placeholder.com/150", width=150)
+            
+        with cols[1]:  # Text column
+            st.subheader(title)
+            st.write(description)
+            
+        with cols[2]:  # Button column
+            if is_active:
+                if st.button("Get Started", key=f"btn_{title.lower().replace(' ', '_')}"):
+                    st.session_state.current_view = 'docgen'
+                    st.rerun()
+            else:
+                st.button("Coming Soon", disabled=True)
+        st.markdown("---")  # Visual separator
+
 def show_catalog():
     """Display the catalog of available features"""
     st.title("Available Features")
     
-    # Create a grid layout for feature cards
-    col1, col2, col3 = st.columns(3)
+    # First row
+    cols1 = st.columns(3)
+    with cols1[0]:
+        show_feature_card(
+            "Launch DocGen Form",
+            "Create documents using DocGen configurations",
+            is_active=True
+        )
+    with cols1[1]:
+        show_feature_card(
+            "Contract Review",
+            "Review and track contract status"
+        )
+    with cols1[2]:
+        show_feature_card(
+            "Template Management",
+            "Manage document templates"
+        )
     
-    with col1:
-        st.markdown("""
-            <div style='border:1px solid #ddd; padding:20px; border-radius:5px; text-align:center; height:300px;'>
-                <img src='https://via.placeholder.com/150' style='max-width:150px;'/>
-                <h3>Launch DocGen Form</h3>
-                <p style='min-height:60px;'>Create documents using DocGen configurations</p>
-                <button onclick='document.querySelector("[data-testid=\\"stHidden\\"]").click()' style='background-color:#00b4e6; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;'>Get Started</button>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        # Hidden button to handle state change
-        if st.button("", key="launch-docgen", type="primary"):
-            st.session_state.current_view = 'docgen'
-            st.rerun()
-            
-    with col2:
-        st.markdown("""
-            <div style='border:1px solid #ddd; padding:20px; border-radius:5px; text-align:center; height:300px; opacity:0.7;'>
-                <img src='https://via.placeholder.com/150' style='max-width:150px;'/>
-                <h3>Contract Review</h3>
-                <p style='min-height:60px;'>Review and track contract status<br/><i>Coming Soon</i></p>
-                <button style='background-color:#ddd; color:#666; padding:10px 20px; border:none; border-radius:5px; cursor:not-allowed;'>
-                    Coming Soon
-                </button>
-            </div>
-        """, unsafe_allow_html=True)
-            
-    with col3:
-        st.markdown("""
-            <div style='border:1px solid #ddd; padding:20px; border-radius:5px; text-align:center; height:300px; opacity:0.7;'>
-                <img src='https://via.placeholder.com/150' style='max-width:150px;'/>
-                <h3>Template Management</h3>
-                <p style='min-height:60px;'>Manage document templates<br/><i>Coming Soon</i></p>
-                <button style='background-color:#ddd; color:#666; padding:10px 20px; border:none; border-radius:5px; cursor:not-allowed;'>
-                    Coming Soon
-                </button>
-            </div>
-        """, unsafe_allow_html=True)
-            
     # Second row
-    col4, col5, col6 = st.columns(3)
-    
-    with col4:
-        st.markdown("""
-            <div style='border:1px solid #ddd; padding:20px; border-radius:5px; text-align:center; height:300px; opacity:0.7;'>
-                <img src='https://via.placeholder.com/150' style='max-width:150px;'/>
-                <h3>Workflow Management</h3>
-                <p style='min-height:60px;'>Configure and manage workflows<br/><i>Coming Soon</i></p>
-                <button style='background-color:#ddd; color:#666; padding:10px 20px; border:none; border-radius:5px; cursor:not-allowed;'>
-                    Coming Soon
-                </button>
-            </div>
-        """, unsafe_allow_html=True)
-            
-    with col5:
-        st.markdown("""
-            <div style='border:1px solid #ddd; padding:20px; border-radius:5px; text-align:center; height:300px; opacity:0.7;'>
-                <img src='https://via.placeholder.com/150' style='max-width:150px;'/>
-                <h3>Document Search</h3>
-                <p style='min-height:60px;'>Search across your documents<br/><i>Coming Soon</i></p>
-                <button style='background-color:#ddd; color:#666; padding:10px 20px; border:none; border-radius:5px; cursor:not-allowed;'>
-                    Coming Soon
-                </button>
-            </div>
-        """, unsafe_allow_html=True)
-            
-    with col6:
-        st.markdown("""
-            <div style='border:1px solid #ddd; padding:20px; border-radius:5px; text-align:center; height:300px; opacity:0.7;'>
-                <img src='https://via.placeholder.com/150' style='max-width:150px;'/>
-                <h3>Analytics</h3>
-                <p style='min-height:60px;'>View usage and performance metrics<br/><i>Coming Soon</i></p>
-                <button style='background-color:#ddd; color:#666; padding:10px 20px; border:none; border-radius:5px; cursor:not-allowed;'>
-                    Coming Soon
-                </button>
-            </div>
-        """, unsafe_allow_html=True)
+    cols2 = st.columns(3)
+    with cols2[0]:
+        show_feature_card(
+            "Workflow Management",
+            "Configure and manage workflows"
+        )
+    with cols2[1]:
+        show_feature_card(
+            "Document Search",
+            "Search across your documents"
+        )
+    with cols2[2]:
+        show_feature_card(
+            "Analytics",
+            "View usage and performance metrics"
+        )
 
 def show_docgen_interface():
     """Show the DocGen form interface"""
