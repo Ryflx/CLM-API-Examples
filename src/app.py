@@ -436,7 +436,7 @@ def main():
                                 st.error("Please enter an XML payload")
                             else:
                                 create_doc_launcher_task(
-                                    account_id,
+                                    st.session_state.account_id,
                                     st.session_state.selected_config,
                                     xml_payload
                                 )
