@@ -348,7 +348,7 @@ def show_catalog():
     # Add spacing between title and cards
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # First row
+    # Single row of three features
     st.markdown("""
         <style>
             .stColumns {
@@ -357,43 +357,22 @@ def show_catalog():
         </style>
     """, unsafe_allow_html=True)
     
-    row1_cols = st.columns(3, gap="large")
-    with row1_cols[0]:
+    cols = st.columns(3, gap="large")
+    with cols[0]:
         show_feature_card(
             "Launch DocGen Form",
             "Create documents using DocGen configurations",
             is_active=True
         )
-    with row1_cols[1]:
+    with cols[1]:
         show_feature_card(
-            "Contract Review",
-            "Review and track contract status"
+            "Get Document Attributes",
+            "Retrieve and view document attributes and metadata"
         )
-    with row1_cols[2]:
+    with cols[2]:
         show_feature_card(
-            "Template Management",
-            "Manage document templates"
-        )
-    
-    # Add spacing between rows
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Second row
-    row2_cols = st.columns(3, gap="large")
-    with row2_cols[0]:
-        show_feature_card(
-            "Workflow Management",
-            "Configure and manage workflows"
-        )
-    with row2_cols[1]:
-        show_feature_card(
-            "Document Search",
-            "Search across your documents"
-        )
-    with row2_cols[2]:
-        show_feature_card(
-            "Analytics",
-            "View usage and performance metrics"
+            "Update a Document",
+            "Update document properties and metadata"
         )
 
 def show_docgen_interface():
