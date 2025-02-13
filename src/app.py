@@ -332,7 +332,6 @@ def main():
             st.info("Please enter your DocuSign credentials to connect")
             client_id = st.text_input("Enter your DocuSign Integration Key (Client ID)", type="password")
             client_secret = st.text_input("Enter your DocuSign Secret Key", type="password")
-            account_id = st.text_input("Enter your DocuSign Account ID")
             
             connect_button = st.form_submit_button("Connect to DocuSign")
             
@@ -343,8 +342,6 @@ def main():
                 # Store credentials in session state
                 st.session_state.client_id = client_id
                 st.session_state.client_secret = client_secret
-                if account_id:
-                    st.session_state.account_id = account_id
                 
                 try:
                     redirect_uri = get_actual_redirect_uri()
