@@ -321,13 +321,18 @@ def show_feature_card(title, description, is_active=False):
             /* Custom button styling */
             .stButton > button {
                 width: 100%;
-                padding: 0.5rem 1rem;
+                height: 3rem;
+                line-height: 1;
+                padding: 0 1.5rem;
                 font-size: 1rem;
                 font-weight: 500;
                 border-radius: 8px;
                 transition: all 0.3s ease;
                 margin-top: 1rem;
-                height: 2.5rem;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                white-space: nowrap;
             }
             /* Active button */
             .stButton > button:not([disabled]) {
