@@ -291,7 +291,7 @@ def get_actual_redirect_uri():
         return get_config('DOCUSIGN_REDIRECT_URI')
     return base_url
 
-def show_feature_card(title, description, is_active=False):
+def show_feature_card(title, description, is_active=False, image_name=None):
     """Helper function to create a consistent feature card"""
     # Card and button styling
     st.markdown("""
@@ -359,9 +359,11 @@ def show_feature_card(title, description, is_active=False):
     
     # Create card container
     with st.container():
+        # Use custom image if provided, otherwise use placeholder
+        image_path = f"src/image/{image_name}" if image_name else "https://via.placeholder.com/150"
         st.markdown(f"""
             <div class="feature-card">
-                <img src="https://via.placeholder.com/150" style="max-width:150px; margin:auto;">
+                <img src="{image_path}" style="max-width:150px; height:150px; object-fit:contain; margin:auto;">
                 <div class="feature-title">{title}</div>
                 <div class="feature-description">{description}</div>
             </div>
@@ -398,17 +400,20 @@ def show_catalog():
         show_feature_card(
             "Launch DocGen Form",
             "Create documents using DocGen configurations",
-            is_active=True
+            is_active=True,
+            image_name="form.png"
         )
     with cols[1]:
         show_feature_card(
             "Get Document Attributes",
-            "Retrieve and view document attributes and metadata"
+            "Retrieve and view document attributes and metadata",
+            image_name="metadata.png"
         )
     with cols[2]:
         show_feature_card(
             "Update a Document",
-            "Update document properties and metadata"
+            "Update document properties and metadata",
+            image_name="add-document.png"
         )
 
 def show_docgen_interface():
