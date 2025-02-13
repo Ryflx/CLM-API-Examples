@@ -36,11 +36,15 @@ A Python-based Streamlit application that integrates with DocuSign CLM API for c
 - DocuSign OAuth integration
 - Token storage and management
 - Token refresh mechanism
-- Secure credential handling via environment variables
+- Flexible credential management:
+  - User-provided credentials through UI forms
+  - Secure session state storage
+  - Environment variable fallback
 - Streamlit web interface with:
   - DocuSign connection flow
   - Token status display
   - Authentication state management
+  - Credential input forms
   - DocLauncher task creation form
   - XML parameter handling
   - Response display and error handling
@@ -66,11 +70,20 @@ A Python-based Streamlit application that integrates with DocuSign CLM API for c
 ## Changelog
 [Previous changelog entries removed for brevity]
 
-### [2025-02-10]
-- Fixed token path handling:
-  - Added default token path when TOKEN_PATH environment variable is not set
-  - Improved path resolution for token directory creation
-  - Enhanced error handling for token file operations
+### [2025-02-13]
+- Streamlined authentication and credential management:
+  - Removed hardcoded account credentials from configuration
+  - Combined credential collection into a single pre-authentication form:
+    - DocuSign Integration Key (Client ID)
+    - DocuSign Secret Key
+    - DocuSign Account ID
+  - Improved user experience by collecting all required credentials upfront
+  - Enhanced validation to ensure all credentials are provided before authentication
+  - Updated authentication system to use user-provided credentials
+  - Improved error handling and validation for credential inputs
+  - Enhanced security by storing credentials in session state
+  - Added automatic configuration loading after successful authentication
+  - Added clear user feedback for configuration status
 
 ### [2025-02-11]
 - Enhanced DocuSign authentication and Docker setup:
