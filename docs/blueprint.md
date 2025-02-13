@@ -71,19 +71,23 @@ A Python-based Streamlit application that integrates with DocuSign CLM API for c
 [Previous changelog entries removed for brevity]
 
 ### [2025-02-13]
-- Streamlined authentication and credential management:
+- Enhanced authentication and credential management:
   - Removed hardcoded account credentials from configuration
-  - Combined credential collection into a single pre-authentication form:
-    - DocuSign Integration Key (Client ID)
-    - DocuSign Secret Key
-    - DocuSign Account ID
-  - Improved user experience by collecting all required credentials upfront
-  - Enhanced validation to ensure all credentials are provided before authentication
-  - Updated authentication system to use user-provided credentials
-  - Improved error handling and validation for credential inputs
-  - Enhanced security by storing credentials in session state
-  - Added automatic configuration loading after successful authentication
-  - Added clear user feedback for configuration status
+  - Streamlined authentication flow:
+    - Required credentials (Integration Key and Secret Key) collected before authentication
+    - Optional Account ID can be provided during initial setup
+    - Separate Account ID form after authentication if not provided initially
+  - Improved user experience with flexible credential input:
+    - Authentication only requires essential OAuth credentials
+    - Account ID can be provided when needed for API operations
+  - Enhanced validation and error handling:
+    - Clear separation between authentication and API credential requirements
+    - Specific error messages for different credential requirements
+    - Improved feedback during the authentication process
+  - Updated credential storage:
+    - Secure session state storage for all credentials
+    - Environment variable fallback for default values
+  - Added automatic configuration loading after Account ID is provided
 
 ### [2025-02-11]
 - Enhanced DocuSign authentication and Docker setup:
