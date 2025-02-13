@@ -293,7 +293,7 @@ def get_actual_redirect_uri():
 
 def show_feature_card(title, description, is_active=False):
     """Helper function to create a consistent feature card"""
-    # Card styling
+    # Card and button styling
     st.markdown("""
         <style>
             .feature-card {
@@ -317,6 +317,37 @@ def show_feature_card(title, description, is_active=False):
                 margin: 10px 0;
                 min-height: 60px;
                 color: #666;
+            }
+            /* Custom button styling */
+            .stButton > button {
+                width: 100%;
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
+                font-weight: 500;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+                margin-top: 1rem;
+                height: 2.5rem;
+            }
+            /* Active button */
+            .stButton > button:not([disabled]) {
+                background-color: #00b4e6;
+                color: white;
+                border: none;
+                box-shadow: 0 2px 4px rgba(0, 180, 230, 0.2);
+            }
+            .stButton > button:not([disabled]):hover {
+                background-color: #0099cc;
+                box-shadow: 0 4px 8px rgba(0, 180, 230, 0.3);
+                transform: translateY(-1px);
+            }
+            /* Disabled button */
+            .stButton > button[disabled] {
+                background-color: #f5f5f5;
+                color: #999;
+                border: 1px solid #ddd;
+                cursor: not-allowed;
+                opacity: 0.8;
             }
         </style>
     """, unsafe_allow_html=True)
