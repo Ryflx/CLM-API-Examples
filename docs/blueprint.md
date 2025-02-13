@@ -71,6 +71,12 @@ A Python-based Streamlit application that integrates with DocuSign CLM API for c
 [Previous changelog entries removed for brevity]
 
 ### [2025-02-13]
+- Added auto-hide functionality for notifications:
+  - Success and info messages automatically fade away after 5 seconds
+  - Smooth fade-out animation for better user experience
+  - Applies to both initial and dynamically added messages
+  - Improves UI cleanliness by removing temporary notifications
+
 - Enhanced authentication and credential management:
   - Removed hardcoded account credentials from configuration
   - Streamlined authentication flow:
