@@ -9,9 +9,6 @@ from docusign_esign import ApiClient # type: ignore
 class DocuSignAuth:
     def __init__(self):
         """Initialize DocuSign authentication handler"""
-        # Get configuration from Streamlit secrets or environment variables
-        self.client_id = st.secrets.get('DOCUSIGN_CLIENT_ID', os.getenv('DOCUSIGN_CLIENT_ID'))
-        self.client_secret = st.secrets.get('DOCUSIGN_CLIENT_SECRET', os.getenv('DOCUSIGN_CLIENT_SECRET'))
         self.auth_server = st.secrets.get('DOCUSIGN_AUTH_SERVER', os.getenv('DOCUSIGN_AUTH_SERVER'))
         self.token_path = os.getenv('TOKEN_PATH', os.path.join('.tokens', 'token.json'))
         self.api_client = ApiClient()
@@ -22,25 +19,39 @@ class DocuSignAuth:
         if token_dir:
             Path(token_dir).mkdir(parents=True, exist_ok=True)
 
+    def _get_credentials(self):
+        """Get credentials from session state or fallback to secrets/env"""
+        client_id = getattr(st.session_state, 'client_id', None) or st.secrets.get('DOCUSIGN_CLIENT_ID', os.getenv('DOCUSIGN_CLIENT_ID'))
+        client_secret = getattr(st.session_state, 'client_secret', None) or st.secrets.get('DOCUSIGN_CLIENT_SECRET', os.getenv('DOCUSIGN_CLIENT_SECRET'))
+        return client_id, client_secret
+
     def get_consent_url(self, redirect_uri=None):
         """Generate the consent URL for DocuSign OAuth"""
+        client_id, _ = self._get_credentials()
+        if not client_id:
+            raise Exception("DocuSign Integration Key (Client ID) is required")
+            
         self.redirect_uri = redirect_uri or st.secrets.get('DOCUSIGN_REDIRECT_URI', os.getenv('DOCUSIGN_REDIRECT_URI', 'http://localhost:8501'))
         return (
             f"https://{self.auth_server}/oauth/auth"
             f"?response_type=code"
             f"&scope=signature%20impersonation%20spring_write%20spring_read"
-            f"&client_id={self.client_id}"
+            f"&client_id={client_id}"
             f"&redirect_uri={self.redirect_uri}"
         )
 
     def get_token_from_code(self, code, redirect_uri=None):
         """Exchange authorization code for access token"""
+        client_id, client_secret = self._get_credentials()
+        if not client_id or not client_secret:
+            raise Exception("DocuSign Integration Key (Client ID) and Secret Key are required")
+            
         url = f"https://{self.auth_server}/oauth/token"
         data = {
             'grant_type': 'authorization_code',
             'code': code,
-            'client_id': self.client_id,
-            'client_secret': self.client_secret,
+            'client_id': client_id,
+            'client_secret': client_secret,
             'redirect_uri': redirect_uri or self.redirect_uri
         }
         response = requests.post(url, data=data)
@@ -53,12 +64,16 @@ class DocuSignAuth:
 
     def refresh_token(self, refresh_token):
         """Refresh the access token using refresh token"""
+        client_id, client_secret = self._get_credentials()
+        if not client_id or not client_secret:
+            raise Exception("DocuSign Integration Key (Client ID) and Secret Key are required")
+            
         url = f"https://{self.auth_server}/oauth/token"
         data = {
             'grant_type': 'refresh_token',
             'refresh_token': refresh_token,
-            'client_id': self.client_id,
-            'client_secret': self.client_secret
+            'client_id': client_id,
+            'client_secret': client_secret
         }
         response = requests.post(url, data=data)
         if response.status_code == 200:
