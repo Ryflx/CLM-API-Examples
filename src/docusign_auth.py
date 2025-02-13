@@ -23,13 +23,14 @@ class DocuSignAuth:
         """Get credentials from session state or fallback to secrets/env"""
         client_id = getattr(st.session_state, 'client_id', None) or st.secrets.get('DOCUSIGN_CLIENT_ID', os.getenv('DOCUSIGN_CLIENT_ID'))
         client_secret = getattr(st.session_state, 'client_secret', None) or st.secrets.get('DOCUSIGN_CLIENT_SECRET', os.getenv('DOCUSIGN_CLIENT_SECRET'))
-        return client_id, client_secret
+        account_id = getattr(st.session_state, 'account_id', None)
+        return client_id, client_secret, account_id
 
     def get_consent_url(self, redirect_uri=None):
         """Generate the consent URL for DocuSign OAuth"""
-        client_id, _ = self._get_credentials()
-        if not client_id:
-            raise Exception("DocuSign Integration Key (Client ID) is required")
+        client_id, _, account_id = self._get_credentials()
+        if not client_id or not account_id:
+            raise Exception("DocuSign Integration Key (Client ID) and Account ID are required")
             
         self.redirect_uri = redirect_uri or st.secrets.get('DOCUSIGN_REDIRECT_URI', os.getenv('DOCUSIGN_REDIRECT_URI', 'http://localhost:8501'))
         return (
@@ -42,9 +43,9 @@ class DocuSignAuth:
 
     def get_token_from_code(self, code, redirect_uri=None):
         """Exchange authorization code for access token"""
-        client_id, client_secret = self._get_credentials()
-        if not client_id or not client_secret:
-            raise Exception("DocuSign Integration Key (Client ID) and Secret Key are required")
+        client_id, client_secret, account_id = self._get_credentials()
+        if not client_id or not client_secret or not account_id:
+            raise Exception("DocuSign Integration Key (Client ID), Secret Key, and Account ID are required")
             
         url = f"https://{self.auth_server}/oauth/token"
         data = {
@@ -64,9 +65,9 @@ class DocuSignAuth:
 
     def refresh_token(self, refresh_token):
         """Refresh the access token using refresh token"""
-        client_id, client_secret = self._get_credentials()
-        if not client_id or not client_secret:
-            raise Exception("DocuSign Integration Key (Client ID) and Secret Key are required")
+        client_id, client_secret, account_id = self._get_credentials()
+        if not client_id or not client_secret or not account_id:
+            raise Exception("DocuSign Integration Key (Client ID), Secret Key, and Account ID are required")
             
         url = f"https://{self.auth_server}/oauth/token"
         data = {

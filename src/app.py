@@ -327,21 +327,23 @@ def main():
         st.warning("Not authenticated with DocuSign")
         
         # DocuSign Configuration Inputs before authentication
-        with st.form("docusign_config_pre_auth"):
+        with st.form("docusign_config"):
             st.subheader("DocuSign Configuration")
             st.info("Please enter your DocuSign credentials to connect")
             client_id = st.text_input("Enter your DocuSign Integration Key (Client ID)", type="password")
             client_secret = st.text_input("Enter your DocuSign Secret Key", type="password")
+            account_id = st.text_input("Enter your DocuSign Account ID")
             
             connect_button = st.form_submit_button("Connect to DocuSign")
             
         if connect_button:
-            if not client_id or not client_secret:
-                st.error("Please fill in both Integration Key and Secret Key")
+            if not client_id or not client_secret or not account_id:
+                st.error("Please fill in all DocuSign credentials")
             else:
                 # Store credentials in session state
                 st.session_state.client_id = client_id
                 st.session_state.client_secret = client_secret
+                st.session_state.account_id = account_id
                 
                 try:
                     redirect_uri = get_actual_redirect_uri()
@@ -367,25 +369,7 @@ def main():
                     "token_type": token_data['token_type']
                 })
 
-            # DocuSign Configuration Inputs
-            with st.form("docusign_config"):
-                st.subheader("DocuSign Configuration")
-                client_id = st.text_input("Enter your DocuSign Integration Key (Client ID)", type="password")
-                client_secret = st.text_input("Enter your DocuSign Secret Key", type="password")
-                account_id = st.text_input("Enter your DocuSign Account ID")
-                
-                submit_config = st.form_submit_button("Save Configuration")
-                
-            if submit_config:
-                if not client_id or not client_secret or not account_id:
-                    st.error("Please fill in all DocuSign configuration fields")
-                else:
-                    # Store the configuration in session state
-                    st.session_state.client_id = client_id
-                    st.session_state.client_secret = client_secret
-                    st.session_state.account_id = account_id
-                    st.success("Configuration saved!")
-            
+            # Load configurations immediately after authentication
             if hasattr(st.session_state, 'account_id'):
                 # Get configurations if not already loaded
                 if not st.session_state.configs:
