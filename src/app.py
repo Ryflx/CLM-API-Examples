@@ -293,63 +293,104 @@ def get_actual_redirect_uri():
 
 def show_feature_card(title, description, is_active=False):
     """Helper function to create a consistent feature card"""
-    # Create a container with border styling
+    # Card styling
+    st.markdown("""
+        <style>
+            .feature-card {
+                border: 1px solid #ddd;
+                border-radius: 10px;
+                padding: 20px;
+                margin: 10px 0;
+                background-color: white;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .feature-title {
+                margin: 15px 0;
+                font-size: 1.2em;
+                font-weight: bold;
+            }
+            .feature-description {
+                margin: 10px 0;
+                min-height: 60px;
+                color: #666;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    # Create card container
     with st.container():
-        st.markdown("---")  # Visual separator
-        cols = st.columns([2, 3, 2])  # Image, Text, Button columns
+        st.markdown(f"""
+            <div class="feature-card">
+                <img src="https://via.placeholder.com/150" style="max-width:150px; margin:auto;">
+                <div class="feature-title">{title}</div>
+                <div class="feature-description">{description}</div>
+            </div>
+        """, unsafe_allow_html=True)
         
-        with cols[0]:  # Image column
-            st.image("https://via.placeholder.com/150", width=150)
-            
-        with cols[1]:  # Text column
-            st.subheader(title)
-            st.write(description)
-            
-        with cols[2]:  # Button column
+        # Center the button using columns
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
             if is_active:
-                if st.button("Get Started", key=f"btn_{title.lower().replace(' ', '_')}_active"):
+                if st.button("Get Started", key=f"btn_{title.lower().replace(' ', '_')}_active", use_container_width=True):
                     st.session_state.current_view = 'docgen'
                     st.rerun()
             else:
-                st.button("Coming Soon", key=f"btn_{title.lower().replace(' ', '_')}_disabled", disabled=True)
-        st.markdown("---")  # Visual separator
+                st.button("Coming Soon", key=f"btn_{title.lower().replace(' ', '_')}_disabled", disabled=True, use_container_width=True)
 
 def show_catalog():
     """Display the catalog of available features"""
     st.title("Available Features")
     
+    # Add spacing between title and cards
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     # First row
-    cols1 = st.columns(3)
-    with cols1[0]:
+    st.markdown("""
+        <style>
+            .stColumns {
+                gap: 2rem;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    row1_cols = st.columns(3, gap="large")
+    with row1_cols[0]:
         show_feature_card(
             "Launch DocGen Form",
             "Create documents using DocGen configurations",
             is_active=True
         )
-    with cols1[1]:
+    with row1_cols[1]:
         show_feature_card(
             "Contract Review",
             "Review and track contract status"
         )
-    with cols1[2]:
+    with row1_cols[2]:
         show_feature_card(
             "Template Management",
             "Manage document templates"
         )
     
+    # Add spacing between rows
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     # Second row
-    cols2 = st.columns(3)
-    with cols2[0]:
+    row2_cols = st.columns(3, gap="large")
+    with row2_cols[0]:
         show_feature_card(
             "Workflow Management",
             "Configure and manage workflows"
         )
-    with cols2[1]:
+    with row2_cols[1]:
         show_feature_card(
             "Document Search",
             "Search across your documents"
         )
-    with cols2[2]:
+    with row2_cols[2]:
         show_feature_card(
             "Analytics",
             "View usage and performance metrics"
