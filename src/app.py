@@ -304,43 +304,14 @@ def show_catalog():
                 <img src='https://via.placeholder.com/150' style='max-width:150px;'/>
                 <h3>Launch DocGen Form</h3>
                 <p style='min-height:60px;'>Create documents using DocGen configurations</p>
-                <div id="docgen-button-container"></div>
+                <button onclick='document.querySelector("[data-testid=\\"stHidden\\"]").click()' style='background-color:#00b4e6; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;'>Get Started</button>
             </div>
         """, unsafe_allow_html=True)
         
-        # Hidden button that will be triggered by JavaScript
+        # Hidden button to handle state change
         if st.button("", key="launch-docgen", type="primary"):
             st.session_state.current_view = 'docgen'
             st.rerun()
-            
-        # Add JavaScript to create and style the button
-        st.markdown("""
-            <script>
-                // Create the button
-                const button = document.createElement('button');
-                button.textContent = 'Get Started';
-                button.style.backgroundColor = '#00b4e6';
-                button.style.color = 'white';
-                button.style.padding = '10px 20px';
-                button.style.border = 'none';
-                button.style.borderRadius = '5px';
-                button.style.cursor = 'pointer';
-                button.onclick = function() {
-                    document.querySelector('[data-testid="stHidden"]').click();
-                };
-                
-                // Add hover effect
-                button.onmouseover = function() {
-                    this.style.backgroundColor = '#0099cc';
-                };
-                button.onmouseout = function() {
-                    this.style.backgroundColor = '#00b4e6';
-                };
-                
-                // Add the button to the container
-                document.getElementById('docgen-button-container').appendChild(button);
-            </script>
-        """, unsafe_allow_html=True)
             
     with col2:
         st.markdown("""
