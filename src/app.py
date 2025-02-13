@@ -307,11 +307,11 @@ def show_feature_card(title, description, is_active=False):
             
         with cols[2]:  # Button column
             if is_active:
-                if st.button("Get Started", key=f"btn_{title.lower().replace(' ', '_')}"):
+                if st.button("Get Started", key=f"btn_{title.lower().replace(' ', '_')}_active"):
                     st.session_state.current_view = 'docgen'
                     st.rerun()
             else:
-                st.button("Coming Soon", disabled=True)
+                st.button("Coming Soon", key=f"btn_{title.lower().replace(' ', '_')}_disabled", disabled=True)
         st.markdown("---")  # Visual separator
 
 def show_catalog():
