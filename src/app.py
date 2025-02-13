@@ -290,6 +290,88 @@ def create_doc_launcher_task(account_id, config_href, xml_payload, max_retries=3
         st.error(error_msg)
         return None
 
+def get_document_attributes(account_id, doc_id, max_retries=3):
+    """Get document attributes using CLM API"""
+    try:
+        headers = {
+            'Authorization': f"Bearer {st.session_state.token_data['access_token']}",
+            'Content-Type': 'application/json'
+        }
+        
+        endpoint = f"https://apiuatna11.springcm.com/v2/{account_id}/documents/{doc_id}?expand=AttributeGroups"
+        
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                log_api_call("GET", endpoint)
+                response = requests.get(endpoint, headers=headers)
+                
+                # Check if we got a 500 error
+                if response.status_code == 500:
+                    retry_count += 1
+                    if retry_count < max_retries:
+                        st.warning(f"Server error, retrying... (Attempt {retry_count + 1}/{max_retries})")
+                        continue
+                    else:
+                        st.error("Maximum retries reached. Please try again later.")
+                        return None
+                
+                # For other errors, try to get more details
+                if response.status_code != 200:
+                    try:
+                        error_data = response.json()
+                        error_msg = error_data.get('Message', response.text)
+                    except:
+                        error_msg = response.text
+                    st.error(f"API Error ({response.status_code}): {error_msg}")
+                    return None
+                
+                response_data = response.json()
+                log_api_call("GET", endpoint, response_data=response_data)
+                return response_data
+                
+            except requests.exceptions.RequestException as e:
+                retry_count += 1
+                if retry_count < max_retries:
+                    st.warning(f"Connection error, retrying... (Attempt {retry_count + 1}/{max_retries})")
+                    continue
+                else:
+                    st.error(f"Failed to connect after {max_retries} attempts: {str(e)}")
+                    return None
+
+    except Exception as e:
+        error_msg = f"Failed to get document attributes: {str(e)}"
+        logger.error(error_msg)
+        st.error(error_msg)
+        return None
+
+def show_document_attributes_interface():
+    """Show the document attributes interface"""
+    # Add back button
+    if st.button("← Back to Catalog"):
+        st.session_state.current_view = 'catalog'
+        st.rerun()
+        
+    st.title("Get Document Attributes")
+    st.write("Enter a Document ID to retrieve its attributes")
+    
+    # Document ID input
+    doc_id = st.text_input("Enter Document ID")
+    
+    # Get attributes button
+    if st.button("Get Attributes"):
+        if not doc_id:
+            st.error("Please enter a Document ID")
+        else:
+            with st.spinner("Retrieving document attributes..."):
+                result = get_document_attributes(
+                    st.session_state.account_id,
+                    doc_id
+                )
+                if result:
+                    st.success("Document attributes retrieved successfully!")
+                    st.json(result)
+
 def get_actual_redirect_uri():
     """Get the actual redirect URI based on how the app is being accessed"""
     # Get the URL where the app is being accessed
@@ -382,7 +464,10 @@ def show_feature_card(title, description, is_active=False, image_name=None):
         with col2:
             if is_active:
                 if st.button("Get Started", key=f"btn_{title.lower().replace(' ', '_')}_active", use_container_width=True):
-                    st.session_state.current_view = 'docgen'
+                    if title == "Launch DocGen Form":
+                        st.session_state.current_view = 'docgen'
+                    elif title == "Get Document Attributes":
+                        st.session_state.current_view = 'document_attributes'
                     st.rerun()
             else:
                 st.button("Coming Soon", key=f"btn_{title.lower().replace(' ', '_')}_disabled", disabled=True, use_container_width=True)
@@ -415,6 +500,7 @@ def show_catalog():
         show_feature_card(
             "Get Document Attributes",
             "Retrieve and view document attributes and metadata",
+            is_active=True,
             image_name="metadata.png"
         )
     with cols[2]:
@@ -627,6 +713,8 @@ def main():
                     show_catalog()
                 elif st.session_state.current_view == 'docgen':
                     show_docgen_interface()
+                elif st.session_state.current_view == 'document_attributes':
+                    show_document_attributes_interface()
 
             if st.button("Disconnect"):
                 # Delete the token file
