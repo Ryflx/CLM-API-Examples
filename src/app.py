@@ -8,6 +8,14 @@ import webbrowser
 import json
 import requests
 
+# GitHub raw content URLs
+REPO_URL = "https://raw.githubusercontent.com/Ryflx/CLM-API-Examples/main"
+FEATURE_IMAGES = {
+    "form": f"{REPO_URL}/src/image/form.png",
+    "metadata": f"{REPO_URL}/src/image/metadata.png",
+    "add-document": f"{REPO_URL}/src/image/add-document.png"
+}
+
 # Get configuration from Streamlit secrets or environment variables
 def get_config(key):
     return st.secrets.get(key, os.getenv(key))
@@ -359,11 +367,11 @@ def show_feature_card(title, description, is_active=False, image_name=None):
     
     # Create card container
     with st.container():
-        # Use custom image if provided, otherwise use placeholder
-        image_path = f"src/image/{image_name}" if image_name else "https://via.placeholder.com/150"
+        # Use GitHub raw URL if image name provided, otherwise use placeholder
+        image_url = FEATURE_IMAGES.get(image_name.split('.')[0]) if image_name else "https://via.placeholder.com/150"
         st.markdown(f"""
             <div class="feature-card">
-                <img src="{image_path}" style="max-width:150px; height:150px; object-fit:contain; margin:auto;">
+                <img src="{image_url}" style="max-width:150px; height:150px; object-fit:contain; margin:auto;">
                 <div class="feature-title">{title}</div>
                 <div class="feature-description">{description}</div>
             </div>
