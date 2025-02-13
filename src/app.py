@@ -337,13 +337,14 @@ def main():
             connect_button = st.form_submit_button("Connect to DocuSign")
             
         if connect_button:
-            if not client_id or not client_secret or not account_id:
-                st.error("Please fill in all DocuSign credentials")
+            if not client_id or not client_secret:
+                st.error("Please fill in Integration Key and Secret Key")
             else:
                 # Store credentials in session state
                 st.session_state.client_id = client_id
                 st.session_state.client_secret = client_secret
-                st.session_state.account_id = account_id
+                if account_id:
+                    st.session_state.account_id = account_id
                 
                 try:
                     redirect_uri = get_actual_redirect_uri()
@@ -369,12 +370,24 @@ def main():
                     "token_type": token_data['token_type']
                 })
 
-            # Load configurations immediately after authentication
-            if hasattr(st.session_state, 'account_id'):
+            # Check for account ID and load configurations
+            if not hasattr(st.session_state, 'account_id'):
+                with st.form("account_id_form"):
+                    st.info("Please enter your DocuSign Account ID to continue")
+                    new_account_id = st.text_input("Enter your DocuSign Account ID")
+                    submit_account = st.form_submit_button("Save Account ID")
+                
+                if submit_account:
+                    if not new_account_id:
+                        st.error("Please enter your Account ID")
+                    else:
+                        st.session_state.account_id = new_account_id
+                        st.rerun()
+            else:
                 # Get configurations if not already loaded
                 if not st.session_state.configs:
                     with st.spinner("Loading DocGen configurations..."):
-                        configs = get_docgen_configurations(account_id)
+                        configs = get_docgen_configurations(st.session_state.account_id)
                         if configs:
                             st.session_state.configs = configs
                 
