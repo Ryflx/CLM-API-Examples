@@ -70,6 +70,16 @@ A Python-based Streamlit application that integrates with DocuSign CLM API for c
 ## Changelog
 [Previous changelog entries removed for brevity]
 
+### [2025-02-28]
+- Enhanced UI with additional feature previews:
+  - Added a second row of 3 feature tiles to the main catalog page
+  - Added new "work-in-progress.png" image for upcoming features
+  - Added placeholders for upcoming features:
+    - "Kick off workflow" - Start a workflow process in DocuSign CLM
+    - "XML Merge" - Merge XML data with document templates
+    - "Simulate Sourcing" - Test sourcing processes in a sandbox environment
+  - All new features marked as "Coming Soon" with disabled buttons
+
 ### [2025-02-13]
 - Added auto-hide functionality for notifications:
   - Success and info messages automatically fade away after 5 seconds

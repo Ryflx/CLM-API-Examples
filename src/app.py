@@ -13,7 +13,8 @@ REPO_URL = "https://raw.githubusercontent.com/Ryflx/CLM-API-Examples/main"
 FEATURE_IMAGES = {
     "form": f"{REPO_URL}/src/image/form.png",
     "metadata": f"{REPO_URL}/src/image/metadata.png",
-    "add-document": f"{REPO_URL}/src/image/add-document.png"
+    "add-document": f"{REPO_URL}/src/image/add-document.png",
+    "work-in-progress": f"{REPO_URL}/src/image/work-in-progress.png"
 }
 
 # Get configuration from Streamlit secrets or environment variables
@@ -479,7 +480,7 @@ def show_catalog():
     # Add spacing between title and cards
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Single row of three features
+    # Style for columns
     st.markdown("""
         <style>
             .stColumns {
@@ -488,6 +489,7 @@ def show_catalog():
         </style>
     """, unsafe_allow_html=True)
     
+    # First row of three features
     cols = st.columns(3, gap="large")
     with cols[0]:
         show_feature_card(
@@ -508,6 +510,33 @@ def show_catalog():
             "Update a Document",
             "Update document properties and metadata",
             image_name="add-document.png"
+        )
+    
+    # Add spacing between rows
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Second row of three features (new)
+    cols2 = st.columns(3, gap="large")
+    with cols2[0]:
+        show_feature_card(
+            "Kick off workflow",
+            "Start a workflow process in DocuSign CLM",
+            is_active=False,
+            image_name="work-in-progress.png"
+        )
+    with cols2[1]:
+        show_feature_card(
+            "XML Merge",
+            "Merge XML data with document templates",
+            is_active=False,
+            image_name="work-in-progress.png"
+        )
+    with cols2[2]:
+        show_feature_card(
+            "Simulate Sourcing",
+            "Test sourcing processes in a sandbox environment",
+            is_active=False,
+            image_name="work-in-progress.png"
         )
 
 def show_docgen_interface():
