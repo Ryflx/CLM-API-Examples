@@ -520,7 +520,7 @@ def show_catalog():
     with cols2[0]:
         show_feature_card(
             "Kick off workflow",
-            "Start a workflow process in DocuSign CLM",
+            "Start a workflow in DocuSign CLM",
             is_active=False,
             image_name="work-in-progress.png"
         )
@@ -533,8 +533,8 @@ def show_catalog():
         )
     with cols2[2]:
         show_feature_card(
-            "Simulate Sourcing",
-            "Test sourcing processes in a sandbox environment",
+            "Sourcing Login",
+            "Onboard a new Supplier",
             is_active=False,
             image_name="work-in-progress.png"
         )
