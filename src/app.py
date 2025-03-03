@@ -346,6 +346,89 @@ def get_document_attributes(account_id, doc_id, max_retries=3):
         st.error(error_msg)
         return None
 
+def filter_attributes(data, search_term):
+    """Recursively search through nested JSON for matching attributes"""
+    results = []
+    search_term = search_term.lower()
+    
+    def search_recursive(obj, path=None):
+        if path is None:
+            path = []
+            
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                current_path = path + [key]
+                
+                # Check if this key-value pair matches
+                if isinstance(value, str) and search_term in value.lower():
+                    results.append({
+                        'path': current_path,
+                        'key': key,
+                        'value': value,
+                        'full_path': ' > '.join(current_path)
+                    })
+                elif isinstance(key, str) and search_term in key.lower():
+                    results.append({
+                        'path': current_path,
+                        'key': key,
+                        'value': value,
+                        'full_path': ' > '.join(current_path)
+                    })
+                
+                # Continue searching deeper
+                search_recursive(value, current_path)
+                
+        elif isinstance(obj, list):
+            for i, item in enumerate(obj):
+                current_path = path + [f"[{i}]"]
+                search_recursive(item, current_path)
+    
+    search_recursive(data)
+    return results
+
+def display_filtered_results(filtered_results, search_term):
+    """Display filtered attribute results with highlighting"""
+    if not filtered_results:
+        st.info(f"No matches found for '{search_term}'")
+        return
+    
+    st.success(f"Found {len(filtered_results)} matches for '{search_term}'")
+    
+    # Group results by top-level path for better organization
+    grouped_results = {}
+    for result in filtered_results:
+        if len(result['path']) > 0:
+            top_level = result['path'][0]
+            if top_level not in grouped_results:
+                grouped_results[top_level] = []
+            grouped_results[top_level].append(result)
+    
+    # Display grouped results
+    for group, items in grouped_results.items():
+        with st.expander(f"{group} ({len(items)} matches)", expanded=True):
+            for item in items:
+                # Create a container for each result
+                with st.container():
+                    # Display the path
+                    st.markdown(f"**Path:** {item['full_path']}")
+                    
+                    # Display the key-value pair with highlighting
+                    key = item['key']
+                    value = item['value']
+                    
+                    if isinstance(value, str):
+                        # Highlight the matching text in the value
+                        highlighted_value = value.replace(
+                            search_term, 
+                            f"<span style='background-color: yellow; color: black;'>{search_term}</span>"
+                        )
+                        st.markdown(f"**{key}:** {highlighted_value}", unsafe_allow_html=True)
+                    else:
+                        # For non-string values, just display as is
+                        st.markdown(f"**{key}:** {value}")
+                    
+                    st.markdown("---")
+
 def show_document_attributes_interface():
     """Show the document attributes interface"""
     # Add back button
@@ -371,7 +454,30 @@ def show_document_attributes_interface():
                 )
                 if result:
                     st.success("Document attributes retrieved successfully!")
-                    st.json(result)
+                    # Store the result in session state for searching
+                    st.session_state.document_attributes = result
+    
+    # Search functionality (only show if we have document attributes)
+    if 'document_attributes' in st.session_state:
+        st.subheader("Search Document Attributes")
+        st.write("Enter a search term to filter attributes (e.g., 'Status: Contract Review')")
+        
+        # Search input and options
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            search_term = st.text_input("Search Term", key="attribute_search")
+        with col2:
+            show_full_json = st.checkbox("Show Full JSON", value=False)
+        
+        # Perform search if we have a search term
+        if search_term:
+            filtered_results = filter_attributes(st.session_state.document_attributes, search_term)
+            display_filtered_results(filtered_results, search_term)
+        
+        # Option to show full JSON
+        if show_full_json or not search_term:
+            with st.expander("Full JSON Response", expanded=not search_term):
+                st.json(st.session_state.document_attributes)
 
 def get_actual_redirect_uri():
     """Get the actual redirect URI based on how the app is being accessed"""

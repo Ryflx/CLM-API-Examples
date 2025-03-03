@@ -70,6 +70,16 @@ A Python-based Streamlit application that integrates with DocuSign CLM API for c
 ## Changelog
 [Previous changelog entries removed for brevity]
 
+### [2025-03-03]
+- Added search filter functionality to document attributes interface:
+  - Implemented search capability to filter document attributes
+  - Added recursive search through nested JSON data
+  - Grouped search results by top-level attribute for better organization
+  - Added highlighting of matching text in search results
+  - Included full path display for each match to provide context
+  - Added toggle to switch between filtered view and full JSON view
+  - Improved user experience with clear search instructions
+
 ### [2025-02-28]
 - Enhanced UI with additional feature previews:
   - Added a second row of 3 feature tiles to the main catalog page
