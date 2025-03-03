@@ -387,47 +387,29 @@ def filter_attributes(data, search_term):
     return results
 
 def display_filtered_results(filtered_results, search_term):
-    """Display filtered attribute results with highlighting"""
+    """Display filtered attribute results with highlighting in a simplified format"""
     if not filtered_results:
         st.info(f"No matches found for '{search_term}'")
         return
     
     st.success(f"Found {len(filtered_results)} matches for '{search_term}'")
     
-    # Group results by top-level path for better organization
-    grouped_results = {}
-    for result in filtered_results:
-        if len(result['path']) > 0:
-            top_level = result['path'][0]
-            if top_level not in grouped_results:
-                grouped_results[top_level] = []
-            grouped_results[top_level].append(result)
-    
-    # Display grouped results
-    for group, items in grouped_results.items():
-        with st.expander(f"{group} ({len(items)} matches)", expanded=True):
-            for item in items:
-                # Create a container for each result
-                with st.container():
-                    # Display the path
-                    st.markdown(f"**Path:** {item['full_path']}")
-                    
-                    # Display the key-value pair with highlighting
-                    key = item['key']
-                    value = item['value']
-                    
-                    if isinstance(value, str):
-                        # Highlight the matching text in the value
-                        highlighted_value = value.replace(
-                            search_term, 
-                            f"<span style='background-color: yellow; color: black;'>{search_term}</span>"
-                        )
-                        st.markdown(f"**{key}:** {highlighted_value}", unsafe_allow_html=True)
-                    else:
-                        # For non-string values, just display as is
-                        st.markdown(f"**{key}:** {value}")
-                    
-                    st.markdown("---")
+    # Display results in a simple list format
+    for item in filtered_results:
+        # Display the key-value pair with highlighting
+        key = item['key']
+        value = item['value']
+        
+        if isinstance(value, str):
+            # Highlight the matching text in the value
+            highlighted_value = value.replace(
+                search_term, 
+                f"<span style='background-color: yellow; color: black;'>{search_term}</span>"
+            )
+            st.markdown(f"**{key}:** {highlighted_value}", unsafe_allow_html=True)
+        else:
+            # For non-string values, just display as is
+            st.markdown(f"**{key}:** {value}")
 
 def show_document_attributes_interface():
     """Show the document attributes interface"""
