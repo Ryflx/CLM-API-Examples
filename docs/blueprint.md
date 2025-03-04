@@ -70,6 +70,17 @@ A Python-based Streamlit application that integrates with DocuSign CLM API for c
 ## Changelog
 [Previous changelog entries removed for brevity]
 
+### [2025-03-04]
+- Added "Sourcing Login" flow:
+  - Implemented multi-step process for supplier onboarding
+  - Created login interface that accepts any credentials
+  - Added use case selection page with "Purchasing Agreement" option
+  - Implemented form page with pre-filled data from sourcing.xml
+  - Organized form into expandable sections for better readability
+  - Integrated with existing DocLauncher task creation functionality
+  - Added navigation between all steps with back buttons
+  - Maintained consistent UI styling throughout the flow
+
 ### [2025-03-03]
 - Added search filter functionality to document attributes interface:
   - Implemented search capability to filter document attributes

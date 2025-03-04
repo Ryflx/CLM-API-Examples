@@ -557,6 +557,8 @@ def show_feature_card(title, description, is_active=False, image_name=None):
                         st.session_state.current_view = 'docgen'
                     elif title == "Get Document Attributes":
                         st.session_state.current_view = 'document_attributes'
+                    elif title == "Sourcing Login":
+                        st.session_state.current_view = 'sourcing_login'
                     st.rerun()
             else:
                 st.button("Coming Soon", key=f"btn_{title.lower().replace(' ', '_')}_disabled", disabled=True, use_container_width=True)
@@ -623,7 +625,7 @@ def show_catalog():
         show_feature_card(
             "Sourcing Login",
             "Onboard a new Supplier",
-            is_active=False,
+            is_active=True,
             image_name="work-in-progress.png"
         )
 
@@ -696,6 +698,148 @@ def show_docgen_interface():
                         st.session_state.selected_config,
                         xml_payload
                     )
+
+def show_sourcing_login_interface():
+    """Show the sourcing login interface"""
+    # Add back button
+    if st.button("← Back to Catalog"):
+        st.session_state.current_view = 'catalog'
+        st.rerun()
+        
+    st.title("Sourcing System Login")
+    st.write("Enter your credentials to access the sourcing system")
+    
+    # Login form
+    with st.form("sourcing_login_form"):
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        login_button = st.form_submit_button("Login")
+    
+    if login_button:
+        # Any credentials are accepted
+        if not username or not password:
+            st.error("Please enter both username and password")
+        else:
+            st.success(f"Welcome, {username}!")
+            # Move to the use case selection page
+            st.session_state.sourcing_username = username
+            st.session_state.current_view = 'sourcing_use_case'
+            st.rerun()
+
+def show_sourcing_use_case_interface():
+    """Show the sourcing use case selection interface"""
+    # Add back button
+    if st.button("← Back to Login"):
+        st.session_state.current_view = 'sourcing_login'
+        st.rerun()
+        
+    st.title("Select Use Case")
+    st.write(f"Welcome, {st.session_state.sourcing_username}. Please select a use case to proceed.")
+    
+    # Use case selection
+    use_case = st.selectbox(
+        "Select Use Case",
+        ["Purchasing Agreement"],
+        index=0
+    )
+    
+    if st.button("Continue"):
+        # Load the XML data from the file
+        try:
+            with open("docs/sourcing.xml", "r") as file:
+                xml_data = file.read()
+                st.session_state.sourcing_xml_data = xml_data
+                st.session_state.current_view = 'sourcing_form'
+                st.rerun()
+        except Exception as e:
+            st.error(f"Error loading sourcing data: {str(e)}")
+
+def show_sourcing_form_interface():
+    """Show the sourcing form interface with pre-filled data"""
+    # Add back button
+    if st.button("← Back to Use Case Selection"):
+        st.session_state.current_view = 'sourcing_use_case'
+        st.rerun()
+        
+    st.title("Purchasing Agreement Details")
+    st.write("Review and submit the pre-filled information from the sourcing system")
+    
+    # Display form sections with pre-filled data
+    with st.expander("Contract Type", expanded=True):
+        st.write("**Contract Category:** Procurement")
+        st.write("**Document Type:** Purchasing Agreement")
+    
+    with st.expander("Supplier Information", expanded=True):
+        st.write("**Supplier Type:** Existing Vendor")
+        st.write("**Supplier Name:** ABC Company")
+        st.write("**Billing Address:** 45 North Avenue")
+        st.write("**Billing City:** London")
+        st.write("**Billing Postal Code:** E1 2YC")
+        st.write("**Billing Country:** United Kingdom")
+    
+    with st.expander("Contract Details", expanded=True):
+        st.write("**Internal Entity:** Tally UK")
+        st.write("**Start Date:** 2025-03-04")
+        st.write("**Contract Term:** 24 months")
+        st.write("**Expiration Date:** 2027-03-04")
+    
+    with st.expander("Agreement Details", expanded=True):
+        st.write("**Contract Configuration:** Standard")
+        st.write("**Total Agreement Spend:** 50,000")
+        st.write("**Payment Terms:** 60 days")
+        st.write("**Governing Law:** England and Wales")
+        st.write("**Limitation of Liability:** Standard")
+        st.write("**Termination Notice:** 30 days")
+    
+    with st.expander("Contract Routing", expanded=True):
+        st.write("**Contract Routing:** Send for Signature")
+        st.write("**Supplier Contact Email:** demo@supplier.co.uk")
+    
+    # Get configurations if not already loaded
+    if not st.session_state.configs:
+        with st.spinner("Loading DocGen configurations..."):
+            configs = get_docgen_configurations(st.session_state.account_id)
+            if configs:
+                st.session_state.configs = configs
+    
+    # Configuration selection if configs are loaded
+    if st.session_state.configs:
+        # Create initial list of configuration names and their hrefs
+        config_options = {}
+        for config in st.session_state.configs.get('Items', []):
+            name = config.get('Name', '')
+            config_id = config.get('Id', '')
+            href = config.get('Href')
+            display_name = f"{name} ({config_id})" if name and config_id else name or 'Unnamed'
+            config_options[display_name] = href
+        
+        # Configuration selection
+        selected_config_name = st.selectbox(
+            "Select DocGen Configuration",
+            options=list(config_options.keys()),
+            key="sourcing_config_selector"
+        )
+        
+        if selected_config_name:
+            st.session_state.selected_config = config_options[selected_config_name]
+            
+            # Submit button
+            if st.button("Submit Agreement"):
+                # Use the XML data from the file
+                xml_payload = st.session_state.sourcing_xml_data
+                
+                # Create the DocLauncher task
+                result = create_doc_launcher_task(
+                    st.session_state.account_id,
+                    st.session_state.selected_config,
+                    xml_payload
+                )
+                
+                if result:
+                    # Add a button to return to catalog
+                    if st.button("Return to Catalog"):
+                        st.session_state.current_view = 'catalog'
+                        st.rerun()
 
 def main():
     # Add JavaScript for auto-hiding messages
@@ -832,6 +976,12 @@ def main():
                     show_docgen_interface()
                 elif st.session_state.current_view == 'document_attributes':
                     show_document_attributes_interface()
+                elif st.session_state.current_view == 'sourcing_login':
+                    show_sourcing_login_interface()
+                elif st.session_state.current_view == 'sourcing_use_case':
+                    show_sourcing_use_case_interface()
+                elif st.session_state.current_view == 'sourcing_form':
+                    show_sourcing_form_interface()
 
             if st.button("Disconnect"):
                 # Delete the token file
