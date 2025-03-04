@@ -70,6 +70,16 @@ A Python-based Streamlit application that integrates with DocuSign CLM API for c
 ## Changelog
 [Previous changelog entries removed for brevity]
 
+### [2025-03-04] (Update 2)
+- Improved XML data handling in sourcing flow:
+  - Replaced file system access with a structured Python dictionary
+  - Converted XML data to a more programmatically accessible format
+  - Added function to dynamically generate XML from the dictionary when needed
+  - Eliminated dependency on physical file location
+  - Improved reliability for cloud deployment environments
+  - Enhanced maintainability with clearer data structure
+  - Prevents "No such file or directory" errors when accessing sourcing.xml
+
 ### [2025-03-04]
 - Added "Sourcing Login" flow:
   - Implemented multi-step process for supplier onboarding

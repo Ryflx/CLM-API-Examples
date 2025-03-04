@@ -726,6 +726,106 @@ def show_sourcing_login_interface():
             st.session_state.current_view = 'sourcing_use_case'
             st.rerun()
 
+import xml.etree.ElementTree as ET
+from io import StringIO
+
+# Store the sourcing data as a Python dictionary for easier programmatic access
+SOURCING_DATA = {
+    "contract_type": {
+        "category": "Procurement",
+        "doc_type": "Purchasing Agreement"
+    },
+    "supplier": {
+        "type": "Existing Vendor",
+        "name": "ABC Company",
+        "billing": {
+            "address": "45 North Avenue",
+            "city": "London",
+            "postal_code": "E1 2YC",
+            "country": "United Kingdom"
+        },
+        "sfdc_account_id": "0014J00000K7oaG"
+    },
+    "contract_details": {
+        "internal_entity": "Tally UK",
+        "start_date": "2025-03-04",
+        "term_months": 24,
+        "expiration_date": "2027-03-04"
+    },
+    "agreement_details": {
+        "configuration": "Standard",
+        "total_spend": "50,000",
+        "total_spend_raw": 50000,
+        "terms": {
+            "payment": "60 days",
+            "governing_law": "England and Wales",
+            "limitation_of_liability": "Standard",
+            "termination_notice_days": 30
+        }
+    },
+    "routing": {
+        "method": "Send for Signature",
+        "supplier_email": "demo@supplier.co.uk"
+    },
+    "workflow": {
+        "trigger": "Contract Creation",
+        "context": "Standalone"
+    }
+}
+
+# Function to convert the Python dictionary back to XML format for API submission
+def dict_to_sourcing_xml():
+    """Convert the SOURCING_DATA dictionary to XML format for API submission"""
+    xml_template = """<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<TemplateFieldData displayName="" displayValue="">
+  <Step_1__Choose_Contract_Type displayName="Step 1 (Choose Contract Type)" displayValue="Step 1 (Choose Contract Type)">
+    <ContractCategory>{contract_type[category]}</ContractCategory>
+    <DocType>{contract_type[doc_type]}</DocType>
+  </Step_1__Choose_Contract_Type>
+  <Step_2__Choose_Supplier displayName="Step 2 (Choose Supplier)" displayValue="Step 2 (Choose Supplier)">
+    <Supplier_Type key="Existing Vendor">Existing Vendor</Supplier_Type>
+    <Select_Existing_Vendor_Container displayName="Select Existing Vendor" displayValue="Select Existing Vendor">
+      <Select_Existing_Vendor_Dropdown>{supplier[name]}</Select_Existing_Vendor_Dropdown>
+      <Account_Name>{supplier[name]}</Account_Name>
+      <Billing_Address>{supplier[billing][address]}</Billing_Address>
+      <Billing_City>{supplier[billing][city]}</Billing_City>
+      <Billing_Postal_Code>{supplier[billing][postal_code]}</Billing_Postal_Code>
+      <Billing_Country>{supplier[billing][country]}</Billing_Country>
+      <SFDC_Account_Id>{supplier[sfdc_account_id]}</SFDC_Account_Id>
+    </Select_Existing_Vendor_Container>
+  </Step_2__Choose_Supplier>
+  <Step_3__Specify_Contract_Details displayName="Step 3 (Specify Contract Details)" displayValue="Step 3 (Specify Contract Details)">
+    <InternalEntity key="Tally UK">{contract_details[internal_entity]}</InternalEntity>
+    <StartDate>{contract_details[start_date]}</StartDate>
+    <StartDate_unformatted>{contract_details[start_date]}T00:00:00.0000000</StartDate_unformatted>
+    <ContractTerm>{contract_details[term_months]}</ContractTerm>
+    <ContractTerm_unformatted>{contract_details[term_months]}</ContractTerm_unformatted>
+    <Expiration_Date>{contract_details[expiration_date]}</Expiration_Date>
+    <Expiration_Date_unformatted>{contract_details[expiration_date]}T12:43:00.0000000</Expiration_Date_unformatted>
+  </Step_3__Specify_Contract_Details>
+  <Step_4__Specify_Agreement_Details displayName="Step 4 (Specify Agreement Details)" displayValue="Step 4 (Specify Agreement Details)">
+    <Contract_Configuration key="Standard">{agreement_details[configuration]}</Contract_Configuration>
+    <Total_Agreement_Spend>{agreement_details[total_spend]}</Total_Agreement_Spend>
+    <Total_Agreement_Spend_unformatted>{agreement_details[total_spend_raw]}</Total_Agreement_Spend_unformatted>
+    <Contract_Terms displayName="Contract Terms" displayValue="Contract Terms">
+      <Payment_Terms__Standard>{agreement_details[terms][payment]}</Payment_Terms__Standard>
+      <Governing_Law__Standard>{agreement_details[terms][governing_law]}</Governing_Law__Standard>
+      <Limitation_of_Liability__Standard>{agreement_details[terms][limitation_of_liability]}</Limitation_of_Liability__Standard>
+      <Termination_Notice__Standard>{agreement_details[terms][termination_notice_days]}</Termination_Notice__Standard>
+    </Contract_Terms>
+  </Step_4__Specify_Agreement_Details>
+  <Final_Step__Contract_Routing displayName="Final Step (Contract Routing)" displayValue="Final Step (Contract Routing)">
+    <ContractRouting key="Send for Signature">{routing[method]}</ContractRouting>
+    <Supplier_Contact_Email>{routing[supplier_email]}</Supplier_Contact_Email>
+  </Final_Step__Contract_Routing>
+  <Workflow_Info displayName="Workflow Info" displayValue="Workflow Info">
+    <WorkflowTrigger>{workflow[trigger]}</WorkflowTrigger>
+    <Context>{workflow[context]}</Context>
+  </Workflow_Info>
+</TemplateFieldData>"""
+    
+    return xml_template.format(**SOURCING_DATA)
+
 def show_sourcing_use_case_interface():
     """Show the sourcing use case selection interface"""
     # Add back button
@@ -744,15 +844,10 @@ def show_sourcing_use_case_interface():
     )
     
     if st.button("Continue"):
-        # Load the XML data from the file
-        try:
-            with open("docs/sourcing.xml", "r") as file:
-                xml_data = file.read()
-                st.session_state.sourcing_xml_data = xml_data
-                st.session_state.current_view = 'sourcing_form'
-                st.rerun()
-        except Exception as e:
-            st.error(f"Error loading sourcing data: {str(e)}")
+        # Generate XML from our dictionary data structure
+        st.session_state.sourcing_xml_data = dict_to_sourcing_xml()
+        st.session_state.current_view = 'sourcing_form'
+        st.rerun()
 
 def show_sourcing_form_interface():
     """Show the sourcing form interface with pre-filled data"""
