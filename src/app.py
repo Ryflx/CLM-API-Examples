@@ -790,20 +790,24 @@ DUMMY_CUSTOMERS = [
     }
 ]
 
-# Store the sourcing data as a Python dictionary for easier programmatic access
-SOURCING_DATA = {
-    "agreement_type": "",
-    "customer": None
-}
+# Initialize sourcing data in session state if not already present
+def init_sourcing_data():
+    if 'sourcing_data' not in st.session_state:
+        st.session_state.sourcing_data = {
+            "agreement_type": "",
+            "customer": None
+        }
 
-# Function to convert the Python dictionary back to XML format for API submission
+# Function to convert the session state data to XML format for API submission
 def dict_to_sourcing_xml():
-    """Convert the SOURCING_DATA dictionary to XML format for API submission"""
-    if not SOURCING_DATA["customer"]:
+    """Convert the sourcing data from session state to XML format for API submission"""
+    init_sourcing_data()
+    
+    if not st.session_state.sourcing_data["customer"]:
         return ""
     
-    customer = SOURCING_DATA["customer"]
-    agreement_type = SOURCING_DATA["agreement_type"]
+    customer = st.session_state.sourcing_data["customer"]
+    agreement_type = st.session_state.sourcing_data["agreement_type"]
     
     xml_template = """<?xml version="1.0" encoding="utf-16" standalone="yes"?>
 <TemplateFieldData displayName="" displayValue="">
@@ -823,6 +827,9 @@ def dict_to_sourcing_xml():
 
 def show_sourcing_use_case_interface():
     """Show the agreement type selection interface"""
+    # Initialize sourcing data
+    init_sourcing_data()
+    
     # Add back button
     if st.button("← Back to Login"):
         st.session_state.current_view = 'sourcing_login'
@@ -839,13 +846,16 @@ def show_sourcing_use_case_interface():
     )
     
     if st.button("Continue"):
-        # Store the selected agreement type
-        SOURCING_DATA["agreement_type"] = agreement_type
+        # Store the selected agreement type in session state
+        st.session_state.sourcing_data["agreement_type"] = agreement_type
         st.session_state.current_view = 'customer_selection'
         st.rerun()
 
 def show_customer_selection_interface():
     """Show the customer selection interface"""
+    # Initialize sourcing data
+    init_sourcing_data()
+    
     # Add back button
     if st.button("← Back to Agreement Type"):
         st.session_state.current_view = 'sourcing_use_case'
@@ -868,16 +878,20 @@ def show_customer_selection_interface():
         # Find the selected customer in the DUMMY_CUSTOMERS list
         for customer in DUMMY_CUSTOMERS:
             if customer["name"] == selected_customer:
-                SOURCING_DATA["customer"] = customer
+                # Store the customer in session state
+                st.session_state.sourcing_data["customer"] = customer
                 break
         
-        # Generate XML from our dictionary data structure
+        # Generate XML from our session state data
         st.session_state.sourcing_xml_data = dict_to_sourcing_xml()
         st.session_state.current_view = 'sourcing_form'
         st.rerun()
 
 def show_sourcing_form_interface():
     """Show the sourcing form interface with pre-filled data"""
+    # Initialize sourcing data
+    init_sourcing_data()
+    
     # Add back button
     if st.button("← Back to Customer Selection"):
         st.session_state.current_view = 'customer_selection'
@@ -886,16 +900,16 @@ def show_sourcing_form_interface():
     st.title("Pre-populated Form Data")
     st.write("The following information has been pre-populated from the internal system")
     
-    # Check if customer data exists
-    if not SOURCING_DATA["customer"]:
+    # Check if customer data exists in session state
+    if not st.session_state.sourcing_data["customer"]:
         st.error("No customer data found. Please go back and select a customer.")
         return
     
-    customer = SOURCING_DATA["customer"]
+    customer = st.session_state.sourcing_data["customer"]
     
     # Display only the required pre-filled fields
     st.subheader("Agreement Information")
-    st.write(f"**Agreement Type:** {SOURCING_DATA['agreement_type']}")
+    st.write(f"**Agreement Type:** {st.session_state.sourcing_data['agreement_type']}")
     
     st.subheader("Customer Information")
     st.write(f"**Account Name:** {customer['name']}")
