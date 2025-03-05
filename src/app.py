@@ -987,13 +987,6 @@ def main():
         </script>
     """, unsafe_allow_html=True)
     
-    # Only show header image and title if not in sourcing flow
-    is_sourcing_flow = st.session_state.current_view in ['sourcing_login', 'sourcing_use_case', 'customer_selection', 'sourcing_form']
-    
-    if not is_sourcing_flow:
-        st.image("https://cf-images.us-east-1.prod.boltdns.net/v1/static/6118377982001/f500d879-d469-4a49-851c-0337de041880/7c4ad13a-f83b-4e57-8cbc-7997519f8c96/1280x720/match/image.jpg?v=20250205.7")
-        st.title("DocuSign CLM Integration")
-
     # Initialize session state
     if 'authenticated' not in st.session_state:
         st.session_state.authenticated = False
@@ -1003,6 +996,13 @@ def main():
         st.session_state.selected_config = None
     if 'current_view' not in st.session_state:
         st.session_state.current_view = 'catalog'
+    
+    # Only show header image and title if not in sourcing flow
+    is_sourcing_flow = st.session_state.current_view in ['sourcing_login', 'sourcing_use_case', 'customer_selection', 'sourcing_form']
+    
+    if not is_sourcing_flow:
+        st.image("https://cf-images.us-east-1.prod.boltdns.net/v1/static/6118377982001/f500d879-d469-4a49-851c-0337de041880/7c4ad13a-f83b-4e57-8cbc-7997519f8c96/1280x720/match/image.jpg?v=20250205.7")
+        st.title("DocuSign CLM Integration")
 
     # Check for callback
     if not st.session_state.authenticated:
