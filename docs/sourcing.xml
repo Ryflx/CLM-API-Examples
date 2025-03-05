@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<TemplateFieldData displayName="" displayValue="">
+  <Agreement_Type>Purchasing Agreement</Agreement_Type>
+  <Account_Name>ABC Company</Account_Name>
+  <Billing_Address>45 North Avenue</Billing_Address>
+  <Billing_City>London</Billing_City>
+  <Billing_State>Greater London</Billing_State>
+  <Billing_Postal_Code>E1 2YC</Billing_Postal_Code>
+  <Billing_Country>United Kingdom</Billing_Country>
+</TemplateFieldData>

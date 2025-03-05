@@ -70,6 +70,16 @@ A Python-based Streamlit application that integrates with DocuSign CLM API for c
 ## Changelog
 [Previous changelog entries removed for brevity]
 
+### [2025-03-05]
+- Simplified sourcing flow and reduced data requirements:
+  - Modified flow to select agreement type first, then customer
+  - Added dummy customer data with various international locations
+  - Reduced pre-populated fields to only include essential billing information
+  - Updated XML structure to match required field names
+  - Added state/province field that was previously missing
+  - Improved form display with clearer section organization
+  - Added XML payload preview in an expandable section
+
 ### [2025-03-04] (Update 2)
 - Improved XML data handling in sourcing flow:
   - Replaced file system access with a structured Python dictionary

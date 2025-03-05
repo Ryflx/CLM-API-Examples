@@ -729,121 +729,148 @@ def show_sourcing_login_interface():
 import xml.etree.ElementTree as ET
 from io import StringIO
 
-# Store the sourcing data as a Python dictionary for easier programmatic access
-SOURCING_DATA = {
-    "contract_type": {
-        "category": "Procurement",
-        "doc_type": "Purchasing Agreement"
-    },
-    "supplier": {
-        "type": "Existing Vendor",
+# Define agreement types
+AGREEMENT_TYPES = [
+    "Purchasing Agreement",
+    "Master Services Agreement",
+    "Statement of Work"
+]
+
+# Store dummy customer data
+DUMMY_CUSTOMERS = [
+    {
         "name": "ABC Company",
         "billing": {
             "address": "45 North Avenue",
             "city": "London",
+            "state": "Greater London",
             "postal_code": "E1 2YC",
             "country": "United Kingdom"
-        },
-        "sfdc_account_id": "0014J00000K7oaG"
-    },
-    "contract_details": {
-        "internal_entity": "Tally UK",
-        "start_date": "2025-03-04",
-        "term_months": 24,
-        "expiration_date": "2027-03-04"
-    },
-    "agreement_details": {
-        "configuration": "Standard",
-        "total_spend": "50,000",
-        "total_spend_raw": 50000,
-        "terms": {
-            "payment": "60 days",
-            "governing_law": "England and Wales",
-            "limitation_of_liability": "Standard",
-            "termination_notice_days": 30
         }
     },
-    "routing": {
-        "method": "Send for Signature",
-        "supplier_email": "demo@supplier.co.uk"
+    {
+        "name": "XYZ Corporation",
+        "billing": {
+            "address": "123 Main Street",
+            "city": "New York",
+            "state": "NY",
+            "postal_code": "10001",
+            "country": "United States"
+        }
     },
-    "workflow": {
-        "trigger": "Contract Creation",
-        "context": "Standalone"
+    {
+        "name": "Acme Industries",
+        "billing": {
+            "address": "789 Industrial Blvd",
+            "city": "Chicago",
+            "state": "IL",
+            "postal_code": "60601",
+            "country": "United States"
+        }
+    },
+    {
+        "name": "Global Enterprises",
+        "billing": {
+            "address": "1 Business Park",
+            "city": "Singapore",
+            "state": "Central Region",
+            "postal_code": "018956",
+            "country": "Singapore"
+        }
+    },
+    {
+        "name": "Tech Innovations Ltd",
+        "billing": {
+            "address": "42 Innovation Way",
+            "city": "Berlin",
+            "state": "Berlin",
+            "postal_code": "10115",
+            "country": "Germany"
+        }
     }
+]
+
+# Store the sourcing data as a Python dictionary for easier programmatic access
+SOURCING_DATA = {
+    "agreement_type": "",
+    "customer": None
 }
 
 # Function to convert the Python dictionary back to XML format for API submission
 def dict_to_sourcing_xml():
     """Convert the SOURCING_DATA dictionary to XML format for API submission"""
+    if not SOURCING_DATA["customer"]:
+        return ""
+    
+    customer = SOURCING_DATA["customer"]
+    agreement_type = SOURCING_DATA["agreement_type"]
+    
     xml_template = """<?xml version="1.0" encoding="utf-16" standalone="yes"?>
 <TemplateFieldData displayName="" displayValue="">
-  <Step_1__Choose_Contract_Type displayName="Step 1 (Choose Contract Type)" displayValue="Step 1 (Choose Contract Type)">
-    <ContractCategory>{contract_type[category]}</ContractCategory>
-    <DocType>{contract_type[doc_type]}</DocType>
-  </Step_1__Choose_Contract_Type>
-  <Step_2__Choose_Supplier displayName="Step 2 (Choose Supplier)" displayValue="Step 2 (Choose Supplier)">
-    <Supplier_Type key="Existing Vendor">Existing Vendor</Supplier_Type>
-    <Select_Existing_Vendor_Container displayName="Select Existing Vendor" displayValue="Select Existing Vendor">
-      <Select_Existing_Vendor_Dropdown>{supplier[name]}</Select_Existing_Vendor_Dropdown>
-      <Account_Name>{supplier[name]}</Account_Name>
-      <Billing_Address>{supplier[billing][address]}</Billing_Address>
-      <Billing_City>{supplier[billing][city]}</Billing_City>
-      <Billing_Postal_Code>{supplier[billing][postal_code]}</Billing_Postal_Code>
-      <Billing_Country>{supplier[billing][country]}</Billing_Country>
-      <SFDC_Account_Id>{supplier[sfdc_account_id]}</SFDC_Account_Id>
-    </Select_Existing_Vendor_Container>
-  </Step_2__Choose_Supplier>
-  <Step_3__Specify_Contract_Details displayName="Step 3 (Specify Contract Details)" displayValue="Step 3 (Specify Contract Details)">
-    <InternalEntity key="Tally UK">{contract_details[internal_entity]}</InternalEntity>
-    <StartDate>{contract_details[start_date]}</StartDate>
-    <StartDate_unformatted>{contract_details[start_date]}T00:00:00.0000000</StartDate_unformatted>
-    <ContractTerm>{contract_details[term_months]}</ContractTerm>
-    <ContractTerm_unformatted>{contract_details[term_months]}</ContractTerm_unformatted>
-    <Expiration_Date>{contract_details[expiration_date]}</Expiration_Date>
-    <Expiration_Date_unformatted>{contract_details[expiration_date]}T12:43:00.0000000</Expiration_Date_unformatted>
-  </Step_3__Specify_Contract_Details>
-  <Step_4__Specify_Agreement_Details displayName="Step 4 (Specify Agreement Details)" displayValue="Step 4 (Specify Agreement Details)">
-    <Contract_Configuration key="Standard">{agreement_details[configuration]}</Contract_Configuration>
-    <Total_Agreement_Spend>{agreement_details[total_spend]}</Total_Agreement_Spend>
-    <Total_Agreement_Spend_unformatted>{agreement_details[total_spend_raw]}</Total_Agreement_Spend_unformatted>
-    <Contract_Terms displayName="Contract Terms" displayValue="Contract Terms">
-      <Payment_Terms__Standard>{agreement_details[terms][payment]}</Payment_Terms__Standard>
-      <Governing_Law__Standard>{agreement_details[terms][governing_law]}</Governing_Law__Standard>
-      <Limitation_of_Liability__Standard>{agreement_details[terms][limitation_of_liability]}</Limitation_of_Liability__Standard>
-      <Termination_Notice__Standard>{agreement_details[terms][termination_notice_days]}</Termination_Notice__Standard>
-    </Contract_Terms>
-  </Step_4__Specify_Agreement_Details>
-  <Final_Step__Contract_Routing displayName="Final Step (Contract Routing)" displayValue="Final Step (Contract Routing)">
-    <ContractRouting key="Send for Signature">{routing[method]}</ContractRouting>
-    <Supplier_Contact_Email>{routing[supplier_email]}</Supplier_Contact_Email>
-  </Final_Step__Contract_Routing>
-  <Workflow_Info displayName="Workflow Info" displayValue="Workflow Info">
-    <WorkflowTrigger>{workflow[trigger]}</WorkflowTrigger>
-    <Context>{workflow[context]}</Context>
-  </Workflow_Info>
+  <Agreement_Type>{agreement_type}</Agreement_Type>
+  <Account_Name>{customer[name]}</Account_Name>
+  <Billing_Address>{customer[billing][address]}</Billing_Address>
+  <Billing_City>{customer[billing][city]}</Billing_City>
+  <Billing_State>{customer[billing][state]}</Billing_State>
+  <Billing_Postal_Code>{customer[billing][postal_code]}</Billing_Postal_Code>
+  <Billing_Country>{customer[billing][country]}</Billing_Country>
 </TemplateFieldData>"""
     
-    return xml_template.format(**SOURCING_DATA)
+    return xml_template.format(
+        agreement_type=agreement_type,
+        customer=customer
+    )
 
 def show_sourcing_use_case_interface():
-    """Show the sourcing use case selection interface"""
+    """Show the agreement type selection interface"""
     # Add back button
     if st.button("← Back to Login"):
         st.session_state.current_view = 'sourcing_login'
         st.rerun()
         
-    st.title("Select Use Case")
-    st.write(f"Welcome, {st.session_state.sourcing_username}. Please select a use case to proceed.")
+    st.title("Select Agreement Type")
+    st.write(f"Welcome, {st.session_state.sourcing_username}. Please select an agreement type to proceed.")
     
-    # Use case selection
-    use_case = st.selectbox(
-        "Select Use Case",
-        ["Purchasing Agreement"],
+    # Agreement type selection
+    agreement_type = st.selectbox(
+        "Select Agreement Type",
+        AGREEMENT_TYPES,
         index=0
     )
     
     if st.button("Continue"):
+        # Store the selected agreement type
+        SOURCING_DATA["agreement_type"] = agreement_type
+        st.session_state.current_view = 'customer_selection'
+        st.rerun()
+
+def show_customer_selection_interface():
+    """Show the customer selection interface"""
+    # Add back button
+    if st.button("← Back to Agreement Type"):
+        st.session_state.current_view = 'sourcing_use_case'
+        st.rerun()
+        
+    st.title("Select Customer")
+    st.write("Please select a customer to proceed.")
+    
+    # Create a list of customer names for the dropdown
+    customer_names = [customer["name"] for customer in DUMMY_CUSTOMERS]
+    
+    # Customer selection
+    selected_customer = st.selectbox(
+        "Select Customer",
+        customer_names,
+        index=0
+    )
+    
+    if st.button("Continue"):
+        # Find the selected customer in the DUMMY_CUSTOMERS list
+        for customer in DUMMY_CUSTOMERS:
+            if customer["name"] == selected_customer:
+                SOURCING_DATA["customer"] = customer
+                break
+        
         # Generate XML from our dictionary data structure
         st.session_state.sourcing_xml_data = dict_to_sourcing_xml()
         st.session_state.current_view = 'sourcing_form'
@@ -852,43 +879,30 @@ def show_sourcing_use_case_interface():
 def show_sourcing_form_interface():
     """Show the sourcing form interface with pre-filled data"""
     # Add back button
-    if st.button("← Back to Use Case Selection"):
-        st.session_state.current_view = 'sourcing_use_case'
+    if st.button("← Back to Customer Selection"):
+        st.session_state.current_view = 'customer_selection'
         st.rerun()
         
-    st.title("Purchasing Agreement Details")
-    st.write("Review and submit the pre-filled information from the sourcing system")
+    st.title("Pre-populated Form Data")
+    st.write("The following information has been pre-populated from the internal system")
     
-    # Display form sections with pre-filled data
-    with st.expander("Contract Type", expanded=True):
-        st.write("**Contract Category:** Procurement")
-        st.write("**Document Type:** Purchasing Agreement")
+    customer = SOURCING_DATA["customer"]
     
-    with st.expander("Supplier Information", expanded=True):
-        st.write("**Supplier Type:** Existing Vendor")
-        st.write("**Supplier Name:** ABC Company")
-        st.write("**Billing Address:** 45 North Avenue")
-        st.write("**Billing City:** London")
-        st.write("**Billing Postal Code:** E1 2YC")
-        st.write("**Billing Country:** United Kingdom")
+    # Display only the required pre-filled fields
+    st.subheader("Agreement Information")
+    st.write(f"**Agreement Type:** {SOURCING_DATA['agreement_type']}")
     
-    with st.expander("Contract Details", expanded=True):
-        st.write("**Internal Entity:** Tally UK")
-        st.write("**Start Date:** 2025-03-04")
-        st.write("**Contract Term:** 24 months")
-        st.write("**Expiration Date:** 2027-03-04")
+    st.subheader("Customer Information")
+    st.write(f"**Account Name:** {customer['name']}")
+    st.write(f"**Billing Address:** {customer['billing']['address']}")
+    st.write(f"**Billing City:** {customer['billing']['city']}")
+    st.write(f"**Billing State:** {customer['billing']['state']}")
+    st.write(f"**Billing Postal Code:** {customer['billing']['postal_code']}")
+    st.write(f"**Billing Country:** {customer['billing']['country']}")
     
-    with st.expander("Agreement Details", expanded=True):
-        st.write("**Contract Configuration:** Standard")
-        st.write("**Total Agreement Spend:** 50,000")
-        st.write("**Payment Terms:** 60 days")
-        st.write("**Governing Law:** England and Wales")
-        st.write("**Limitation of Liability:** Standard")
-        st.write("**Termination Notice:** 30 days")
-    
-    with st.expander("Contract Routing", expanded=True):
-        st.write("**Contract Routing:** Send for Signature")
-        st.write("**Supplier Contact Email:** demo@supplier.co.uk")
+    # Display the XML that will be sent
+    with st.expander("View XML Payload"):
+        st.code(st.session_state.sourcing_xml_data, language="xml")
     
     # Get configurations if not already loaded
     if not st.session_state.configs:
@@ -920,7 +934,7 @@ def show_sourcing_form_interface():
             
             # Submit button
             if st.button("Submit Agreement"):
-                # Use the XML data from the file
+                # Use the XML data from the dictionary
                 xml_payload = st.session_state.sourcing_xml_data
                 
                 # Create the DocLauncher task
@@ -1075,6 +1089,8 @@ def main():
                     show_sourcing_login_interface()
                 elif st.session_state.current_view == 'sourcing_use_case':
                     show_sourcing_use_case_interface()
+                elif st.session_state.current_view == 'customer_selection':
+                    show_customer_selection_interface()
                 elif st.session_state.current_view == 'sourcing_form':
                     show_sourcing_form_interface()
 
