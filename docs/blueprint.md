@@ -70,6 +70,13 @@ A Python-based Streamlit application that integrates with DocuSign CLM API for c
 ## Changelog
 [Previous changelog entries removed for brevity]
 
+### [2025-03-05] (Update 5)
+- Fixed session state initialization error:
+  - Fixed AttributeError by initializing session state before checking current_view
+  - Reordered code to ensure session state variables are properly initialized
+  - Prevents 'st.session_state has no attribute current_view' error
+  - Improved application stability and error handling
+
 ### [2025-03-05] (Update 4)
 - Improved sourcing flow aesthetics:
   - Hide DocuSign header image in sourcing flow
