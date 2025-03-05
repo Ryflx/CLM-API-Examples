@@ -923,51 +923,29 @@ def show_sourcing_form_interface():
     with st.expander("View XML Payload"):
         st.code(st.session_state.sourcing_xml_data, language="xml")
     
-    # Get configurations if not already loaded
-    if not st.session_state.configs:
-        with st.spinner("Loading DocGen configurations..."):
-            configs = get_docgen_configurations(st.session_state.account_id)
-            if configs:
-                st.session_state.configs = configs
+    # Use the specific configuration for Purchase Agreement
+    purchase_agreement_config = {
+        "Name": "Purchase Agreement - Portal",
+        "Href": "https://apiuatna11.springcm.com/v2/26238559-d602-4e8a-801e-27ca5cfdb446/doclauncherconfigurations/a0b5cea8-8a5b-414f-a295-5014dd3428b4"
+    }
     
-    # Configuration selection if configs are loaded
-    if st.session_state.configs:
-        # Create initial list of configuration names and their hrefs
-        config_options = {}
-        for config in st.session_state.configs.get('Items', []):
-            name = config.get('Name', '')
-            config_id = config.get('Id', '')
-            href = config.get('Href')
-            display_name = f"{name} ({config_id})" if name and config_id else name or 'Unnamed'
-            config_options[display_name] = href
+    # Submit button
+    if st.button("Create Contract"):
+        # Use the XML data from the session state
+        xml_payload = st.session_state.sourcing_xml_data
         
-        # Configuration selection
-        selected_config_name = st.selectbox(
-            "Select DocGen Configuration",
-            options=list(config_options.keys()),
-            key="sourcing_config_selector"
+        # Create the DocLauncher task with the specific configuration
+        result = create_doc_launcher_task(
+            st.session_state.account_id,
+            purchase_agreement_config["Href"],
+            xml_payload
         )
         
-        if selected_config_name:
-            st.session_state.selected_config = config_options[selected_config_name]
-            
-            # Submit button
-            if st.button("Submit Agreement"):
-                # Use the XML data from the dictionary
-                xml_payload = st.session_state.sourcing_xml_data
-                
-                # Create the DocLauncher task
-                result = create_doc_launcher_task(
-                    st.session_state.account_id,
-                    st.session_state.selected_config,
-                    xml_payload
-                )
-                
-                if result:
-                    # Add a button to return to catalog
-                    if st.button("Return to Catalog"):
-                        st.session_state.current_view = 'catalog'
-                        st.rerun()
+        if result:
+            # Add a button to return to catalog
+            if st.button("Return to Catalog"):
+                st.session_state.current_view = 'catalog'
+                st.rerun()
 
 def main():
     # Add JavaScript for auto-hiding messages
