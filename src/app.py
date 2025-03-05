@@ -987,8 +987,12 @@ def main():
         </script>
     """, unsafe_allow_html=True)
     
-    st.image("https://cf-images.us-east-1.prod.boltdns.net/v1/static/6118377982001/f500d879-d469-4a49-851c-0337de041880/7c4ad13a-f83b-4e57-8cbc-7997519f8c96/1280x720/match/image.jpg?v=20250205.7")
-    st.title("DocuSign CLM Integration")
+    # Only show header image and title if not in sourcing flow
+    is_sourcing_flow = st.session_state.current_view in ['sourcing_login', 'sourcing_use_case', 'customer_selection', 'sourcing_form']
+    
+    if not is_sourcing_flow:
+        st.image("https://cf-images.us-east-1.prod.boltdns.net/v1/static/6118377982001/f500d879-d469-4a49-851c-0337de041880/7c4ad13a-f83b-4e57-8cbc-7997519f8c96/1280x720/match/image.jpg?v=20250205.7")
+        st.title("DocuSign CLM Integration")
 
     # Initialize session state
     if 'authenticated' not in st.session_state:
@@ -1047,16 +1051,18 @@ def main():
                     st.error(f"Failed to connect: {str(e)}")
     else:
         if check_token():
-            st.success("Connected to DocuSign")
-            
-            # Display token information
-            token_data = st.session_state.token_data
-            with st.expander("View Token Information"):
-                st.json({
-                    "access_token": token_data['access_token'][:20] + "...",
-                    "expires_in": token_data['expires_in'],
-                    "token_type": token_data['token_type']
-                })
+            # Only show connection status and token information if not in sourcing flow
+            if not is_sourcing_flow:
+                st.success("Connected to DocuSign")
+                
+                # Display token information
+                token_data = st.session_state.token_data
+                with st.expander("View Token Information"):
+                    st.json({
+                        "access_token": token_data['access_token'][:20] + "...",
+                        "expires_in": token_data['expires_in'],
+                        "token_type": token_data['token_type']
+                    })
 
             # Check for account ID
             if not hasattr(st.session_state, 'account_id'):
@@ -1088,16 +1094,18 @@ def main():
                 elif st.session_state.current_view == 'sourcing_form':
                     show_sourcing_form_interface()
 
-            if st.button("Disconnect"):
-                # Delete the token file
-                auth_handler.delete_token()
-                # Clear session state
-                st.session_state.authenticated = False
-                st.session_state.token_data = None
-                st.session_state.configs = None
-                st.session_state.selected_config = None
-                logger.info("User disconnected from DocuSign")
-                st.rerun()
+            # Only show disconnect button if not in sourcing flow
+            if not is_sourcing_flow:
+                if st.button("Disconnect"):
+                    # Delete the token file
+                    auth_handler.delete_token()
+                    # Clear session state
+                    st.session_state.authenticated = False
+                    st.session_state.token_data = None
+                    st.session_state.configs = None
+                    st.session_state.selected_config = None
+                    logger.info("User disconnected from DocuSign")
+                    st.rerun()
 
 if __name__ == "__main__":
     main()
