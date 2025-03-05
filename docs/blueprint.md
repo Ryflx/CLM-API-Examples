@@ -70,6 +70,13 @@ A Python-based Streamlit application that integrates with DocuSign CLM API for c
 ## Changelog
 [Previous changelog entries removed for brevity]
 
+### [2025-03-05] (Update 3)
+- Further simplified form interface:
+  - Removed Agreement Information section
+  - Removed Agreement Type field from display
+  - Kept only Customer Information section
+  - Focused the UI on the essential billing information
+
 ### [2025-03-05] (Update 2)
 - Simplified contract creation interface:
   - Replaced configuration selection dropdown with a direct "Create Contract" button
