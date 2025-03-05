@@ -908,9 +908,6 @@ def show_sourcing_form_interface():
     customer = st.session_state.sourcing_data["customer"]
     
     # Display only the required pre-filled fields
-    st.subheader("Agreement Information")
-    st.write(f"**Agreement Type:** {st.session_state.sourcing_data['agreement_type']}")
-    
     st.subheader("Customer Information")
     st.write(f"**Account Name:** {customer['name']}")
     st.write(f"**Billing Address:** {customer['billing']['address']}")
