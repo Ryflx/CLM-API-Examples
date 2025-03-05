@@ -886,6 +886,11 @@ def show_sourcing_form_interface():
     st.title("Pre-populated Form Data")
     st.write("The following information has been pre-populated from the internal system")
     
+    # Check if customer data exists
+    if not SOURCING_DATA["customer"]:
+        st.error("No customer data found. Please go back and select a customer.")
+        return
+    
     customer = SOURCING_DATA["customer"]
     
     # Display only the required pre-filled fields
