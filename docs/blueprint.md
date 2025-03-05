@@ -70,6 +70,13 @@ A Python-based Streamlit application that integrates with DocuSign CLM API for c
 ## Changelog
 [Previous changelog entries removed for brevity]
 
+### [2025-03-05] (Update 4)
+- Improved sourcing flow aesthetics:
+  - Hide DocuSign header image in sourcing flow
+  - Hide application title in sourcing flow
+  - Hide token information and disconnect button in sourcing flow
+  - Create cleaner, more focused UI for sourcing experience
+
 ### [2025-03-05] (Update 3)
 - Further simplified form interface:
   - Removed Agreement Information section
