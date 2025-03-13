@@ -14,7 +14,8 @@ FEATURE_IMAGES = {
     "form": f"{REPO_URL}/src/image/form.png",
     "metadata": f"{REPO_URL}/src/image/metadata.png",
     "add-document": f"{REPO_URL}/src/image/add-document.png",
-    "work-in-progress": f"{REPO_URL}/src/image/work-in-progress.png"
+    "work-in-progress": f"{REPO_URL}/src/image/work-in-progress.png",
+    "negotiation": f"{REPO_URL}/src/image/negotiation.png"
 }
 
 # Get configuration from Streamlit secrets or environment variables
