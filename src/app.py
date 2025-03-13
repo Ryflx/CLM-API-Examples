@@ -14,7 +14,7 @@ FEATURE_IMAGES = {
     "form": f"{REPO_URL}/src/image/form.png",
     "metadata": f"{REPO_URL}/src/image/metadata.png",
     "add-document": f"{REPO_URL}/src/image/add-document.png",
-    "work-in-progress": f"{REPO_URL}/src/image/work-in-progress.png"
+    "negotiation": f"{REPO_URL}/src/image/negotiation.png"
 }
 
 # Get configuration from Streamlit secrets or environment variables
@@ -612,21 +612,21 @@ def show_catalog():
             "Kick off workflow",
             "Start a workflow in DocuSign CLM",
             is_active=False,
-            image_name="work-in-progress.png"
+            image_name="negotiation.png"
         )
     with cols2[1]:
         show_feature_card(
             "XML Merge",
             "Merge XML data with document templates",
             is_active=False,
-            image_name="work-in-progress.png"
+            image_name="negotiation.png"
         )
     with cols2[2]:
         show_feature_card(
             "Sourcing Login",
             "Onboard a new Supplier",
             is_active=True,
-            image_name="work-in-progress.png"
+            image_name="negotiation.png"
         )
 
 def show_docgen_interface():
