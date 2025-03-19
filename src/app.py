@@ -944,6 +944,27 @@ def show_sourcing_form_interface():
             if st.button("Return to Catalog"):
                 st.session_state.current_view = 'catalog'
                 st.rerun()
+    
+    # Get Status button
+    if st.button("Get Status"):
+        try:
+            # Call the middleware API to get contract status
+            status_url = "https://telemetry-service.onrender.com/services/getStatus/demo@example.com/Purchasing%20Agreement"
+            response = requests.get(status_url)
+            
+            if response.status_code == 200:
+                status_data = response.json()
+                
+                # Display the status information
+                st.success(f"Contract Status: {status_data.get('contract_status', 'Unknown')}")
+                
+                # Show full response details in an expander
+                with st.expander("View Status Details"):
+                    st.json(status_data)
+            else:
+                st.error(f"Failed to get status: HTTP {response.status_code}")
+        except Exception as e:
+            st.error(f"Error getting contract status: {str(e)}")
 
 def main():
     # Add JavaScript for auto-hiding messages
