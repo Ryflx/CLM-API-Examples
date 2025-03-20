@@ -970,42 +970,71 @@ def main():
     # Add JavaScript for auto-hiding messages
     st.markdown("""
         <script>
-            function hideMessages() {
-                const messages = document.querySelectorAll('.stSuccess, .stInfo');
-                messages.forEach(msg => {
-                    setTimeout(() => {
-                        msg.style.transition = 'opacity 1s';
-                        msg.style.opacity = '0';
-                        setTimeout(() => msg.style.display = 'none', 1000);
-                    }, 5000);
+            // Function to hide success and info messages after 5 seconds
+            function hideAllMessages() {
+                setTimeout(function() {
+                    const messages = document.querySelectorAll('.stSuccess, .stInfo');
+                    messages.forEach(function(message) {
+                        message.style.transition = 'opacity 1s ease-out';
+                        message.style.opacity = '0';
+                        setTimeout(function() {
+                            message.style.display = 'none';
+                        }, 1000);
+                    });
+                }, 5000); // Wait 5 seconds before starting to fade
+            }
+            
+            // Function to set up a mutation observer to watch for new messages
+            function setupMessageObserver() {
+                // Create an observer instance
+                const observer = new MutationObserver(function(mutations) {
+                    // Check if any new info or success elements were added
+                    let newMessageAdded = false;
+                    
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                            mutation.addedNodes.forEach(function(node) {
+                                if (node.nodeType === 1) { // Element node
+                                    if (node.classList && 
+                                        (node.classList.contains('stSuccess') || 
+                                         node.classList.contains('stInfo'))) {
+                                        newMessageAdded = true;
+                                    }
+                                    
+                                    // Also check children of added nodes
+                                    const messages = node.querySelectorAll('.stSuccess, .stInfo');
+                                    if (messages.length > 0) {
+                                        newMessageAdded = true;
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    
+                    // If new messages were added, hide them after delay
+                    if (newMessageAdded) {
+                        hideAllMessages();
+                    }
+                });
+                
+                // Start observing the document body
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
                 });
             }
             
-            // Run on initial load
-            hideMessages();
-            
-            // Create observer to handle dynamically added messages
-            const observer = new MutationObserver(mutations => {
-                mutations.forEach(mutation => {
-                    mutation.addedNodes.forEach(node => {
-                        if (node.classList && 
-                            (node.classList.contains('stSuccess') || 
-                             node.classList.contains('stInfo'))) {
-                            setTimeout(() => {
-                                node.style.transition = 'opacity 1s';
-                                node.style.opacity = '0';
-                                setTimeout(() => node.style.display = 'none', 1000);
-                            }, 5000);
-                        }
-                    });
+            // Run when DOM is fully loaded
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    hideAllMessages();
+                    setupMessageObserver();
                 });
-            });
-            
-            // Start observing
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
+            } else {
+                // DOM already loaded
+                hideAllMessages();
+                setupMessageObserver();
+            }
         </script>
     """, unsafe_allow_html=True)
     
