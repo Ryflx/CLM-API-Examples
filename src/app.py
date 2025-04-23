@@ -723,6 +723,12 @@ def show_sourcing_login_interface():
         st.session_state.current_view = 'catalog'
         st.rerun()
         
+    # --- Display Uploaded Logo --- Start ---
+    if 'uploaded_logo_bytes' in st.session_state and st.session_state.uploaded_logo_bytes:
+        st.image(st.session_state.uploaded_logo_bytes, width=150) # Display the logo if it exists
+        st.markdown("---") # Add a separator
+    # --- Display Uploaded Logo --- End ---
+
     st.title("Sourcing System Login")
     st.write("Enter your credentials to access the sourcing system")
     
@@ -852,6 +858,12 @@ def show_sourcing_use_case_interface():
         st.session_state.current_view = 'sourcing_login'
         st.rerun()
         
+    # --- Display Uploaded Logo --- Start ---
+    if 'uploaded_logo_bytes' in st.session_state and st.session_state.uploaded_logo_bytes:
+        st.image(st.session_state.uploaded_logo_bytes, width=150) # Display the logo if it exists
+        st.markdown("---") # Add a separator
+    # --- Display Uploaded Logo --- End ---
+
     st.title("Select Agreement Type")
     st.write(f"Welcome, {st.session_state.sourcing_username}. Please select an agreement type to proceed.")
     
@@ -878,6 +890,12 @@ def show_customer_selection_interface():
         st.session_state.current_view = 'sourcing_use_case'
         st.rerun()
         
+    # --- Display Uploaded Logo --- Start ---
+    if 'uploaded_logo_bytes' in st.session_state and st.session_state.uploaded_logo_bytes:
+        st.image(st.session_state.uploaded_logo_bytes, width=150) # Display the logo if it exists
+        st.markdown("---") # Add a separator
+    # --- Display Uploaded Logo --- End ---
+
     st.title("Select Customer")
     st.write("Please select a customer to proceed.")
     
@@ -915,6 +933,10 @@ def show_sourcing_form_interface():
         st.rerun()
         
     st.title("Pre-populated Form Data")
+
+    # --- DEBUG: Show Session State Keys --- Start ---
+    st.write("DEBUG - Session State Keys:", list(st.session_state.keys()))
+    # --- DEBUG: Show Session State Keys --- End ---
 
     # --- Display Uploaded Logo --- Start ---
     if 'uploaded_logo_bytes' in st.session_state and st.session_state.uploaded_logo_bytes:
