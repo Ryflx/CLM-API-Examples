@@ -560,6 +560,8 @@ def show_feature_card(title, description, is_active=False, image_name=None):
                         st.session_state.current_view = 'document_attributes'
                     elif title == "Sourcing Login":
                         st.session_state.current_view = 'sourcing_login'
+                    elif title == "Settings":
+                        st.session_state.current_view = 'settings'
                     st.rerun()
             else:
                 st.button("Coming Soon", key=f"btn_{title.lower().replace(' ', '_')}_disabled", disabled=True, use_container_width=True)
@@ -629,6 +631,20 @@ def show_catalog():
             is_active=True,
             image_name="negotiation.png"
         )
+
+    # Add spacing between rows
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Third row for Settings
+    cols3 = st.columns(3, gap="large")
+    with cols3[0]: # Place settings card in the first column of the new row
+        show_feature_card(
+            "Settings",
+            "Configure application settings, like uploading a logo",
+            is_active=True,
+            image_name="work-in-progress.png" # Placeholder image for now
+        )
+    # You can add more cards to cols3[1] and cols3[2] if needed in the future
 
 def show_docgen_interface():
     """Show the DocGen form interface"""
@@ -899,6 +915,13 @@ def show_sourcing_form_interface():
         st.rerun()
         
     st.title("Pre-populated Form Data")
+
+    # --- Display Uploaded Logo --- Start ---
+    if 'uploaded_logo_bytes' in st.session_state and st.session_state.uploaded_logo_bytes:
+        st.image(st.session_state.uploaded_logo_bytes, width=150) # Display the logo if it exists
+        st.markdown("---") # Add a separator
+    # --- Display Uploaded Logo --- End ---
+
     st.write("The following information has been pre-populated from the internal system")
     
     # Check if customer data exists in session state
@@ -965,6 +988,38 @@ def show_sourcing_form_interface():
                 st.error(f"Failed to get status: HTTP {response.status_code}")
         except Exception as e:
             st.error(f"Error getting contract status: {str(e)}")
+
+# --- Settings Interface --- Start ---
+def show_settings_interface():
+    """Show the settings interface for uploading a logo"""
+    # Add back button
+    if st.button("← Back to Catalog"):
+        st.session_state.current_view = 'catalog'
+        st.rerun()
+
+    st.title("Settings")
+    st.write("Upload a logo to display in the sourcing example.")
+
+    # Logo uploader
+    uploaded_logo = st.file_uploader("Choose a logo image", type=["png", "jpg", "jpeg"])
+
+    if uploaded_logo is not None:
+        # Read the file content as bytes
+        logo_bytes = uploaded_logo.getvalue()
+        # Store bytes in session state
+        st.session_state.uploaded_logo_bytes = logo_bytes
+        st.success("Logo uploaded successfully!")
+        # Display the uploaded logo as confirmation
+        st.image(logo_bytes, width=100)
+
+    # Optionally, display the currently stored logo
+    elif 'uploaded_logo_bytes' in st.session_state and st.session_state.uploaded_logo_bytes:
+        st.write("Current Logo:")
+        st.image(st.session_state.uploaded_logo_bytes, width=100)
+        if st.button("Remove Logo"):
+            del st.session_state.uploaded_logo_bytes
+            st.rerun()
+# --- Settings Interface --- End ---
 
 def main():
     # Add JavaScript for auto-hiding messages
@@ -1144,6 +1199,8 @@ def main():
                     show_customer_selection_interface()
                 elif st.session_state.current_view == 'sourcing_form':
                     show_sourcing_form_interface()
+                elif st.session_state.current_view == 'settings':
+                    show_settings_interface()
 
             # Only show disconnect button if not in sourcing flow
             if not is_sourcing_flow:
