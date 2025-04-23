@@ -471,7 +471,7 @@ def get_actual_redirect_uri():
         return get_config('DOCUSIGN_REDIRECT_URI')
     return base_url
 
-def show_feature_card(title, description, is_active=False, image_name=None):
+def show_feature_card(title, description, feature_id, is_active=False, image_name=None):
     """Helper function to create a consistent feature card"""
     # Card and button styling
     st.markdown("""
@@ -553,18 +553,21 @@ def show_feature_card(title, description, is_active=False, image_name=None):
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
             if is_active:
-                if st.button("Get Started", key=f"btn_{title.lower().replace(' ', '_')}_active", use_container_width=True):
-                    if title == "Launch DocGen Form":
+                # Use feature_id for the key
+                if st.button("Get Started", key=f"btn_{feature_id}_active", use_container_width=True):
+                    # Navigation logic still uses the title for now, assuming titles are unique enough
+                    # or we map feature_id back to views if needed later.
+                    if feature_id == "docgen": 
                         st.session_state.current_view = 'docgen'
-                    elif title == "Get Document Attributes":
+                    elif feature_id == "document_attributes": 
                         st.session_state.current_view = 'document_attributes'
-                    elif title == "Sourcing Login":
+                    elif feature_id == "sourcing_login": 
                         st.session_state.current_view = 'sourcing_login'
-                    elif title == "Settings":
+                    elif feature_id == "settings": 
                         st.session_state.current_view = 'settings'
                     st.rerun()
             else:
-                st.button("Coming Soon", key=f"btn_{title.lower().replace(' ', '_')}_disabled", disabled=True, use_container_width=True)
+                st.button("Coming Soon", key=f"btn_{feature_id}_disabled", disabled=True, use_container_width=True)
 
 def show_catalog():
     """Display the catalog of available features"""
@@ -582,52 +585,61 @@ def show_catalog():
         </style>
     """, unsafe_allow_html=True)
     
+    # Get the custom sourcing title, default if not set
+    sourcing_title = st.session_state.get("sourcing_login_title", "Sourcing System Login")
+
     # First row of three features
     cols = st.columns(3, gap="large")
     with cols[0]:
         show_feature_card(
-            "Launch DocGen Form",
-            "Create documents using DocGen configurations",
+            title="Launch DocGen Form",
+            description="Create documents using DocGen configurations",
+            feature_id="docgen",
             is_active=True,
             image_name="form.png"
         )
     with cols[1]:
         show_feature_card(
-            "Get Document Attributes",
-            "Retrieve and view document attributes and metadata",
+            title="Get Document Attributes",
+            description="Retrieve and view document attributes and metadata",
+            feature_id="document_attributes",
             is_active=True,
             image_name="metadata.png"
         )
     with cols[2]:
         show_feature_card(
-            "Update a Document",
-            "Update document properties and metadata",
+            title="Update a Document",
+            description="Update document properties and metadata",
+            feature_id="update_document",
             image_name="add-document.png"
         )
     
     # Add spacing between rows
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Second row of three features (new)
+    # Second row of features
     cols2 = st.columns(3, gap="large")
     with cols2[0]:
         show_feature_card(
-            "Kick off workflow",
-            "Start a workflow in DocuSign CLM",
+            title="Kick off workflow",
+            description="Start a workflow in DocuSign CLM",
+            feature_id="kickoff_workflow",
             is_active=False,
             image_name="work-in-progress.png"
         )
     with cols2[1]:
         show_feature_card(
-            "XML Merge",
-            "Merge XML data with document templates",
+            title="XML Merge",
+            description="Merge XML data with document templates",
+            feature_id="xml_merge",
             is_active=False,
             image_name="work-in-progress.png"
         )
     with cols2[2]:
         show_feature_card(
-            "Sourcing Login",
-            "Onboard a new Supplier",
+            title=sourcing_title,
+            description="Onboard a new Supplier",
+            feature_id="sourcing_login",
             is_active=True,
             image_name="negotiation.png"
         )
@@ -637,14 +649,14 @@ def show_catalog():
 
     # Third row for Settings
     cols3 = st.columns(3, gap="large")
-    with cols3[0]: # Place settings card in the first column of the new row
+    with cols3[0]: 
         show_feature_card(
-            "Settings",
-            "Configure application settings, like uploading a logo",
+            title="Settings",
+            description="Configure application settings, like uploading a logo",
+            feature_id="settings",
             is_active=True,
-            image_name="work-in-progress.png" # Placeholder image for now
+            image_name="work-in-progress.png" 
         )
-    # You can add more cards to cols3[1] and cols3[2] if needed in the future
 
 def show_docgen_interface():
     """Show the DocGen form interface"""
@@ -729,7 +741,8 @@ def show_sourcing_login_interface():
         st.markdown("---") # Add a separator
     # --- Display Uploaded Logo --- End ---
 
-    st.title("Sourcing System Login")
+    # Use dynamic title from session state
+    st.title(st.session_state.get("sourcing_login_title", "Sourcing System Login"))
     st.write("Enter your credentials to access the sourcing system")
     
     # Login form
@@ -934,10 +947,6 @@ def show_sourcing_form_interface():
         
     st.title("Pre-populated Form Data")
 
-    # --- DEBUG: Show Session State Keys --- Start ---
-    st.write("DEBUG - Session State Keys:", list(st.session_state.keys()))
-    # --- DEBUG: Show Session State Keys --- End ---
-
     # --- Display Uploaded Logo --- Start ---
     if 'uploaded_logo_bytes' in st.session_state and st.session_state.uploaded_logo_bytes:
         st.image(st.session_state.uploaded_logo_bytes, width=150) # Display the logo if it exists
@@ -1041,6 +1050,25 @@ def show_settings_interface():
         if st.button("Remove Logo"):
             del st.session_state.uploaded_logo_bytes
             st.rerun()
+
+    st.markdown("---") # Separator
+
+    # --- Sourcing Title Setting --- Start ---
+    st.subheader("Customize Feature Title")
+    # Get the current title or use default
+    current_sourcing_title = st.session_state.get("sourcing_login_title", "Sourcing System Login")
+    # Create the text input field
+    new_sourcing_title = st.text_input(
+        "Sourcing Feature Name:", 
+        value=current_sourcing_title,
+        help="Change the display name for the Sourcing Login feature in the catalog and its pages."
+    )
+    # Update session state if the value changed
+    if new_sourcing_title != current_sourcing_title:
+        st.session_state.sourcing_login_title = new_sourcing_title
+        st.rerun() # Rerun to reflect the change immediately in the input field's display
+    # --- Sourcing Title Setting --- End ---
+
 # --- Settings Interface --- End ---
 
 def main():
