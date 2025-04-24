@@ -9,7 +9,12 @@ from docusign_esign import ApiClient # type: ignore
 class DocuSignAuth:
     def __init__(self):
         """Initialize DocuSign authentication handler"""
-        self.auth_server = st.secrets.get('DOCUSIGN_AUTH_SERVER', os.getenv('DOCUSIGN_AUTH_SERVER'))
+        # Use only environment variables for Render compatibility
+        self.auth_server = os.getenv('DOCUSIGN_AUTH_SERVER')
+        if not self.auth_server:
+            st.warning("DOCUSIGN_AUTH_SERVER environment variable not set.") # Optional warning
+            # You might want to raise an Exception here or provide a default if applicable
+
         self.token_path = os.getenv('TOKEN_PATH', os.path.join('.tokens', 'token.json'))
         self.api_client = ApiClient()
         self.redirect_uri = None  # Will be set dynamically
@@ -20,10 +25,18 @@ class DocuSignAuth:
             Path(token_dir).mkdir(parents=True, exist_ok=True)
 
     def _get_credentials(self):
-        """Get credentials from session state or fallback to secrets/env"""
-        client_id = getattr(st.session_state, 'client_id', None) or st.secrets.get('DOCUSIGN_CLIENT_ID', os.getenv('DOCUSIGN_CLIENT_ID'))
-        client_secret = getattr(st.session_state, 'client_secret', None) or st.secrets.get('DOCUSIGN_CLIENT_SECRET', os.getenv('DOCUSIGN_CLIENT_SECRET'))
-        account_id = getattr(st.session_state, 'account_id', None)
+        """Get credentials from session state or fallback to env"""
+        # Prioritize session state (if user entered manually) then environment variables
+        client_id = getattr(st.session_state, 'client_id', None) or os.getenv('DOCUSIGN_CLIENT_ID')
+        client_secret = getattr(st.session_state, 'client_secret', None) or os.getenv('DOCUSIGN_CLIENT_SECRET')
+        account_id = getattr(st.session_state, 'account_id', None) or os.getenv('DOCUSIGN_ACCOUNT_ID') # Added fallback for account_id
+        
+        # Add checks/warnings if critical env vars are missing
+        if not client_id:
+            st.warning("DOCUSIGN_CLIENT_ID environment variable not set.")
+        if not client_secret:
+            st.warning("DOCUSIGN_CLIENT_SECRET environment variable not set.")
+
         return client_id, client_secret, account_id
 
     def get_consent_url(self, redirect_uri=None):
@@ -32,7 +45,12 @@ class DocuSignAuth:
         if not client_id:
             raise Exception("DocuSign Integration Key (Client ID) is required")
             
-        self.redirect_uri = redirect_uri or st.secrets.get('DOCUSIGN_REDIRECT_URI', os.getenv('DOCUSIGN_REDIRECT_URI', 'http://localhost:8501'))
+        # Use environment variable for the default redirect URI
+        self.redirect_uri = redirect_uri or os.getenv('DOCUSIGN_REDIRECT_URI', 'http://localhost:8501')
+        
+        if not self.auth_server:
+             raise Exception("DocuSign Auth Server Hostname is not configured (DOCUSIGN_AUTH_SERVER env var missing)")
+        
         return (
             f"https://{self.auth_server}/oauth/auth"
             f"?response_type=code"

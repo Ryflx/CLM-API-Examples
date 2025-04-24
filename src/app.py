@@ -655,7 +655,7 @@ def show_catalog():
             description="Configure application settings, like uploading a logo",
             feature_id="settings",
             is_active=True,
-            image_name="work-in-progress.png" 
+            image_name="settings.png"
         )
 
 def show_docgen_interface():
