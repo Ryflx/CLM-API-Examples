@@ -543,8 +543,8 @@ def show_feature_card(title, description, feature_id, is_active=False, image_nam
     
     # Create card container
     with st.container():
-        # Use GitHub raw URL if image name provided, otherwise use placeholder
-        image_url = FEATURE_IMAGES.get(image_name.split('.')[0]) if image_name else "https://via.placeholder.com/150"
+        # Construct the URL directly if image_name is provided
+        image_url = f"{REPO_URL}/src/image/{image_name}" if image_name else "https://via.placeholder.com/150"
         st.markdown(f"""
             <div class="feature-card">
                 <img src="{image_url}" style="max-width:150px; height:150px; object-fit:contain; margin:auto;">
@@ -659,7 +659,7 @@ def show_catalog():
             description="Configure application settings, like uploading a logo",
             feature_id="settings",
             is_active=True,
-            image_name="settings.png"
+            image_name="cogwheel.png"
         )
 
 def show_docgen_interface():
@@ -1200,6 +1200,7 @@ def main():
                 
                 try:
                     redirect_uri = get_actual_redirect_uri()
+                    st.write(f"DEBUG: Redirect URI determined by get_actual_redirect_uri(): {redirect_uri}")
                     consent_url = auth_handler.get_consent_url(redirect_uri)
                     logger.info(f"Opening DocuSign consent URL: {consent_url}")
                     webbrowser.open_new_tab(consent_url)
