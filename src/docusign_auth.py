@@ -73,6 +73,7 @@ class DocuSignAuth:
             'client_secret': client_secret,
             'redirect_uri': redirect_uri or self.redirect_uri
         }
+        print(f"DEBUG [get_token_from_code]: URI='{data['redirect_uri']}', ClientID='{client_id}'")
         response = requests.post(url, data=data)
         if response.status_code == 200:
             token_data = response.json()
