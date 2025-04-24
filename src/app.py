@@ -18,9 +18,13 @@ FEATURE_IMAGES = {
     "negotiation": f"{REPO_URL}/src/image/negotiation.png"
 }
 
-# Get configuration from Streamlit secrets or environment variables
+# Get configuration from environment variables (Render compatible)
 def get_config(key):
-    return st.secrets.get(key, os.getenv(key))
+    value = os.getenv(key)
+    # Optional: Add a warning if a critical key is missing
+    # if value is None:
+    #     st.warning(f"Environment variable '{key}' not set.") 
+    return value
 
 # Configure logging
 log_directory = "logs"
