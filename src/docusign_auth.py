@@ -66,13 +66,18 @@ class DocuSignAuth:
             raise Exception("DocuSign Integration Key (Client ID) and Secret Key are required")
             
         url = f"https://{self.auth_server}/oauth/token"
+        
+        # IMPORTANT: Force the redirect URI to be the Render URL consistently
+        consistent_redirect_uri = "https://clm-api-examples.onrender.com/"
+        
         data = {
             'grant_type': 'authorization_code',
             'code': code,
             'client_id': client_id,
             'client_secret': client_secret,
-            'redirect_uri': redirect_uri or self.redirect_uri
+            'redirect_uri': consistent_redirect_uri  # Use consistent URL instead of dynamic one
         }
+        
         print(f"DEBUG [get_token_from_code]: URI='{data['redirect_uri']}', ClientID='{client_id}'")
         response = requests.post(url, data=data)
         if response.status_code == 200:
