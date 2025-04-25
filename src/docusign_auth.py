@@ -47,10 +47,13 @@ class DocuSignAuth:
 
     def get_consent_url(self, redirect_uri=None):
         """Generate the consent URL for DocuSign OAuth"""
-        client_id, _, _ = self._get_credentials()
+        client_id, client_secret, _ = self._get_credentials()
         if not client_id:
             raise Exception("DocuSign Integration Key (Client ID) is required")
             
+        # Store credentials to a temporary file to survive redirect
+        self._store_temp_credentials(client_id, client_secret)
+        
         # Use environment variable for the default redirect URI
         self.redirect_uri = redirect_uri or os.getenv('DOCUSIGN_REDIRECT_URI', 'http://localhost:8501')
         
@@ -67,9 +70,18 @@ class DocuSignAuth:
 
     def get_token_from_code(self, code, redirect_uri=None):
         """Exchange authorization code for access token"""
+        # Try to get credentials from session state first
         client_id, client_secret, _ = self._get_credentials()
+        
+        # If credentials not available from session state, try the temp file
+        if not client_id or not client_secret:
+            print("DEBUG [get_token_from_code]: Credentials not found in session, trying temp file")
+            client_id, client_secret = self._load_temp_credentials()
+            
         if not client_id or not client_secret:
             raise Exception("DocuSign Integration Key (Client ID) and Secret Key are required")
+            
+        print(f"DEBUG [get_token_from_code]: Got credentials: client_id={client_id[:8]}...")
             
         url = f"https://{self.auth_server}/oauth/token"
         
@@ -86,6 +98,9 @@ class DocuSignAuth:
         
         print(f"DEBUG [get_token_from_code]: URI='{data['redirect_uri']}', ClientID='{client_id}'")
         response = requests.post(url, data=data)
+        
+        print(f"DEBUG [get_token_from_code-RESPONSE]: Status={response.status_code}, Headers={response.headers}")
+        
         if response.status_code == 200:
             token_data = response.json()
             self._save_token(token_data)
@@ -149,3 +164,43 @@ class DocuSignAuth:
         except Exception:
             pass
         return False
+
+    def _store_temp_credentials(self, client_id, client_secret):
+        """Store credentials temporarily to survive the redirect flow"""
+        try:
+            temp_creds = {
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            # Create a temporary credentials file
+            temp_creds_path = os.path.join('.tokens', 'temp_creds.json')
+            os.makedirs(os.path.dirname(temp_creds_path), exist_ok=True)
+            
+            with open(temp_creds_path, 'w') as f:
+                json.dump(temp_creds, f)
+            
+            print(f"DEBUG [_store_temp_credentials]: Stored credentials to temp file")
+        except Exception as e:
+            print(f"DEBUG [_store_temp_credentials ERROR]: {str(e)}")
+
+    def _load_temp_credentials(self):
+        """Load temporary credentials if they exist"""
+        try:
+            temp_creds_path = os.path.join('.tokens', 'temp_creds.json')
+            if os.path.exists(temp_creds_path):
+                with open(temp_creds_path, 'r') as f:
+                    temp_creds = json.load(f)
+                
+                # Check if credentials are recent (within last 10 minutes)
+                timestamp = datetime.fromisoformat(temp_creds['timestamp'])
+                if datetime.now() - timestamp < timedelta(minutes=10):
+                    print(f"DEBUG [_load_temp_credentials]: Loaded recent credentials")
+                    return temp_creds["client_id"], temp_creds["client_secret"]
+                else:
+                    print(f"DEBUG [_load_temp_credentials]: Found expired credentials, not using")
+        except Exception as e:
+            print(f"DEBUG [_load_temp_credentials ERROR]: {str(e)}")
+        
+        return None, None

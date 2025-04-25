@@ -77,8 +77,22 @@ def handle_callback():
     if 'code' in st.query_params:
         code = st.query_params['code']
         try:
+            # Debug: Print full session state keys at start of callback
+            print(f"DEBUG [handle_callback-BEGIN]: Session state keys: {list(st.session_state.keys())}")
+            print(f"DEBUG [handle_callback]: Has client_id in session: {'client_id' in st.session_state}")
+            if 'client_id' in st.session_state:
+                print(f"DEBUG [handle_callback]: client_id first few chars: {st.session_state.client_id[:8]}...")
+            
             redirect_uri = get_actual_redirect_uri()
+            print(f"DEBUG [handle_callback]: Calculated redirect_uri: {redirect_uri}")
+            
+            # Debug: Print right before token exchange
+            print(f"DEBUG [handle_callback-PRE-EXCHANGE]: Session state still has client_id: {'client_id' in st.session_state}")
+            
             token_data = auth_handler.get_token_from_code(code, redirect_uri)
+            
+            print(f"DEBUG [handle_callback-POST-EXCHANGE]: Token exchange success!")
+            
             st.session_state.token_data = token_data
             st.session_state.authenticated = True
             st.success("Successfully authenticated with DocuSign!")
@@ -89,6 +103,13 @@ def handle_callback():
             error_msg = f"Authentication failed: {str(e)}"
             logger.error(error_msg)
             st.error(error_msg)
+            # Debug print the exception
+            print(f"DEBUG [handle_callback-ERROR]: {str(e)}")
+            
+            # Debug: print session state after exception
+            print(f"DEBUG [handle_callback-ERROR]: Session state after error: {list(st.session_state.keys())}")
+            if 'client_id' in st.session_state:
+                print(f"DEBUG [handle_callback-ERROR]: client_id first few chars: {st.session_state.client_id[:8]}...")
 
 def check_token():
     """Check and refresh token if necessary"""
