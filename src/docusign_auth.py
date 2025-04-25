@@ -26,16 +26,22 @@ class DocuSignAuth:
 
     def _get_credentials(self):
         """Get credentials from session state or fallback to env"""
-        # Prioritize session state (if user entered manually) then environment variables
-        client_id = getattr(st.session_state, 'client_id', None) or os.getenv('DOCUSIGN_CLIENT_ID')
-        client_secret = getattr(st.session_state, 'client_secret', None) or os.getenv('DOCUSIGN_CLIENT_SECRET')
-        account_id = getattr(st.session_state, 'account_id', None) or os.getenv('DOCUSIGN_ACCOUNT_ID') # Added fallback for account_id
+        # If we have client_id in session state, use both values from session state
+        if hasattr(st.session_state, 'client_id') and st.session_state.client_id:
+            client_id = st.session_state.client_id
+            client_secret = st.session_state.client_secret
+        else:
+            # Only use environment variables if no session state exists
+            client_id = os.getenv('DOCUSIGN_CLIENT_ID')
+            client_secret = os.getenv('DOCUSIGN_CLIENT_SECRET')
         
-        # Add checks/warnings if critical env vars are missing
+        account_id = getattr(st.session_state, 'account_id', None) or os.getenv('DOCUSIGN_ACCOUNT_ID')
+        
+        # Add checks/warnings
         if not client_id:
-            st.warning("DOCUSIGN_CLIENT_ID environment variable not set.")
+            st.warning("DocuSign Client ID not available.")
         if not client_secret:
-            st.warning("DOCUSIGN_CLIENT_SECRET environment variable not set.")
+            st.warning("DocuSign Client Secret not available.")
 
         return client_id, client_secret, account_id
 
