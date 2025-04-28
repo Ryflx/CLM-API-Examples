@@ -1,6 +1,9 @@
 import streamlit as st
 import os
 import logging
+
+print("--- Render App Start --- Python script is running! ---") # Basic test print
+
 from datetime import datetime
 from dotenv import load_dotenv
 from docusign_auth import DocuSignAuth
